@@ -1,0 +1,37 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    # 重点：必须使用 windows-latest，因为你的 csproj 指定了 net8.0-windows
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      # 自动寻找根目录下的 .sln 文件进行依赖还原
+      run: dotnet restore
+
+    - name: Build
+      # --no-restore 表示复用上一步的还原结果
+      # 如果你的 .sln 不在根目录，需要指定路径，例如 ./ConsoleApp1/Shard.csproj
+      run: dotnet build --no-restore --configuration Debug
+
+    # 可选：运行测试
+    # 注意：SDL 相关的图形化测试在 CI 环境（无显示器）中可能会失败
+    # - name: Test
+    #   run: dotnet test --no-build --verbosity normal
