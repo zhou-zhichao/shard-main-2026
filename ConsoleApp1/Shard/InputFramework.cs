@@ -1,28 +1,28 @@
-﻿/*
+/*
 *
-*   SDL provides an input layer, and we're using that.  This class tracks input, anchors it to the 
-*       timing of the game loop, and converts the SDL events into one that is more abstract so games 
+*   SDL provides an input layer, and we're using that.  This class tracks input, anchors it to the
+*       timing of the game loop, and converts the SDL events into one that is more abstract so games
 *       can be written more interchangeably.
 *   @author Michael Heron
 *   @version 1.0
-*   
+*
 */
 
-using SDL2;
+using SDL;
+using static SDL.SDL3;
 
 namespace Shard
 {
 
-    // We'll be using SDL2 here to provide our underlying input system.
-    class InputFramework : InputSystem
+    // We'll be using SDL3 here to provide our underlying input system.
+    unsafe class InputFramework : InputSystem
     {
 
         double tick, timeInterval;
         public override void getInput()
         {
 
-            SDL.SDL_Event ev;
-            int res;
+            SDL_Event ev;
             InputEvent ie;
 
             tick += Bootstrap.getDeltaTime();
@@ -35,77 +35,62 @@ namespace Shard
             while (tick >= timeInterval)
             {
 
-                res = SDL.SDL_PollEvent(out ev);
+                bool hasEvent = SDL_PollEvent(&ev);
 
 
-                if (res != 1)
+                if (!hasEvent)
                 {
                     return;
                 }
 
                 ie = new InputEvent();
 
-                if (ev.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
+                if (ev.type == (uint)SDL_EventType.SDL_EVENT_MOUSE_MOTION)
                 {
-                    SDL.SDL_MouseMotionEvent mot;
-
-                    mot = ev.motion;
-
-                    ie.X = mot.x;
-                    ie.Y = mot.y;
+                    ie.X = (int)ev.motion.x;
+                    ie.Y = (int)ev.motion.y;
 
                     informListeners(ie, "MouseMotion");
                 }
 
-                if (ev.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN)
+                if (ev.type == (uint)SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN)
                 {
-                    SDL.SDL_MouseButtonEvent butt;
-
-                    butt = ev.button;
-
-                    ie.Button = (int)butt.button;
-                    ie.X = butt.x;
-                    ie.Y = butt.y;
+                    ie.Button = (int)ev.button.button;
+                    ie.X = (int)ev.button.x;
+                    ie.Y = (int)ev.button.y;
 
                     informListeners(ie, "MouseDown");
                 }
 
-                if (ev.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP)
+                if (ev.type == (uint)SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP)
                 {
-                    SDL.SDL_MouseButtonEvent butt;
-
-                    butt = ev.button;
-
-                    ie.Button = (int)butt.button;
-                    ie.X = butt.x;
-                    ie.Y = butt.y;
+                    ie.Button = (int)ev.button.button;
+                    ie.X = (int)ev.button.x;
+                    ie.Y = (int)ev.button.y;
 
                     informListeners(ie, "MouseUp");
                 }
 
-                if (ev.type == SDL.SDL_EventType.SDL_MOUSEWHEEL)
+                if (ev.type == (uint)SDL_EventType.SDL_EVENT_MOUSE_WHEEL)
                 {
-                    SDL.SDL_MouseWheelEvent wh;
-
-                    wh = ev.wheel;
-
-                    ie.X = (int)wh.direction * wh.x;
-                    ie.Y = (int)wh.direction * wh.y;
+                    // In SDL3, wheel direction is indicated by sign of x/y values
+                    ie.X = (int)ev.wheel.x;
+                    ie.Y = (int)ev.wheel.y;
 
                     informListeners(ie, "MouseWheel");
                 }
 
 
-                if (ev.type == SDL.SDL_EventType.SDL_KEYDOWN)
+                if (ev.type == (uint)SDL_EventType.SDL_EVENT_KEY_DOWN)
                 {
-                    ie.Key = (int)ev.key.keysym.scancode;
+                    ie.Key = (int)ev.key.scancode;
                     Debug.getInstance().log("Keydown: " + ie.Key);
                     informListeners(ie, "KeyDown");
                 }
 
-                if (ev.type == SDL.SDL_EventType.SDL_KEYUP)
+                if (ev.type == (uint)SDL_EventType.SDL_EVENT_KEY_UP)
                 {
-                    ie.Key = (int)ev.key.keysym.scancode;
+                    ie.Key = (int)ev.key.scancode;
                     informListeners(ie, "KeyUp");
                 }
 

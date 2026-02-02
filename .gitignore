@@ -1,0 +1,13 @@
+# Build results
+bin/
+obj/
+
+# IDE
+.vs/
+*.user
+
+# Claude
+.claude/
+
+# Windows special files
+nul
