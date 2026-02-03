@@ -8,6 +8,7 @@
 *
 */
 
+using System;
 using SDL;
 using static SDL.SDL3;
 
@@ -92,6 +93,11 @@ namespace Shard
                 {
                     ie.Key = (int)ev.key.scancode;
                     informListeners(ie, "KeyUp");
+                }
+
+                if (ev.type == (uint)SDL_EventType.SDL_EVENT_QUIT)
+                {
+                    Environment.Exit(0);
                 }
 
                 tick -= timeInterval;

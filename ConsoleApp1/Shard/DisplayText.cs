@@ -129,8 +129,7 @@ namespace Shard
                 sRect.w = textW;
                 sRect.h = textH;
 
-                SDL_FRect nullRect = new SDL_FRect();
-                SDL_RenderTexture(_rend, td.LblText, &nullRect, &sRect);
+                SDL_RenderTexture(_rend, td.LblText, null, &sRect);
 
             }
 
