@@ -1,38 +1,23 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>x64</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PlatformTarget>x64</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="SDL2\**" />
+    <EmbeddedResource Remove="SDL2\**" />
+    <None Remove="SDL2\**" />
+  </ItemGroup>
 
-	<PropertyGroup>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<ApplicationIcon />
-		<StartupObject />
-	</PropertyGroup>
-
-	<ItemGroup>
-	  <Compile Remove="SDL2\**" />
-	  <EmbeddedResource Remove="SDL2\**" />
-	  <None Remove="SDL2\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Sayers.SDL2.Core" Version="1.0.11" />
-		<PackageReference Include="SDL2-CS" Version="2.0.0" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ppy.SDL3-CS" Version="*" />
+    <PackageReference Include="ppy.SDL3_image-CS" Version="*" />
+    <PackageReference Include="ppy.SDL3_ttf-CS" Version="*" />
+  </ItemGroup>
 
 </Project>
