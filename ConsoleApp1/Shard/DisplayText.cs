@@ -160,7 +160,7 @@ namespace Shard
             _window = SDL_CreateWindow("Shard Game Engine",
                 getWidth(),
                 getHeight(),
-                0);
+                SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
 
             // Center the window after creation
             SDL_SetWindowPosition(_window, (int)SDL_WINDOWPOS_CENTERED, (int)SDL_WINDOWPOS_CENTERED);
