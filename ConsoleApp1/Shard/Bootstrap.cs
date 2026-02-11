@@ -294,6 +294,8 @@ namespace Shard
                 // variable frame rates.
                 input.getInput();
 
+                Bootstrap.getSound().update();
+
                 if (runningGame.isRunning() == true)
                 {
                     // Update runs as fast as the system lets it.  Any kind of movement or counter 

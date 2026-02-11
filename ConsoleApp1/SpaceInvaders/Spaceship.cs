@@ -98,6 +98,25 @@ namespace SpaceInvaders
                     fireBullet();
                 }
             }
+
+
+            // Press L key to play loop background music
+            if (inp.Key == (int)SDL.SDL_Scancode.SDL_SCANCODE_L)
+            {
+                // Assets
+                Bootstrap.getSound().playSound("testmusic.wav", true); 
+            }
+
+            // Press + or - key to adjust the global volume
+            if (inp.Key == (int)SDL.SDL_Scancode.SDL_SCANCODE_EQUALS) // +
+            {
+                Bootstrap.getSound().Volume += 0.1f;
+            }
+            if (inp.Key == (int)SDL.SDL_Scancode.SDL_SCANCODE_MINUS) // -
+            {
+                Bootstrap.getSound().Volume -= 0.1f;
+            }
+
         }
 
         public override void update()

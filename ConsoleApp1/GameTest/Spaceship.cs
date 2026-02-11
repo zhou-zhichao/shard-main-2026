@@ -112,8 +112,6 @@ namespace GameTest
 
             }
 
-
-
             if (eventType == "KeyUp")
             {
                 if (inp.Key == (int)SDL.SDL_Scancode.SDL_SCANCODE_SPACE)

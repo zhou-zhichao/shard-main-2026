@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "jXXTsh82pXI=",
+  "dgSpecHash": "yLLzMhLb9pE=",
   "success": true,
-  "projectFilePath": "D:\\Shard\\shard-main-2026\\ConsoleApp1\\Shard.csproj",
+  "projectFilePath": "F:\\default\\桌面\\game engine\\shard-main-2026\\ConsoleApp1\\Shard.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\gswzd\\.nuget\\packages\\ppy.sdl3-cs\\2025.1205.0\\ppy.sdl3-cs.2025.1205.0.nupkg.sha512",
-    "C:\\Users\\gswzd\\.nuget\\packages\\ppy.sdl3_image-cs\\2025.1205.0\\ppy.sdl3_image-cs.2025.1205.0.nupkg.sha512",
-    "C:\\Users\\gswzd\\.nuget\\packages\\ppy.sdl3_ttf-cs\\2025.1205.0\\ppy.sdl3_ttf-cs.2025.1205.0.nupkg.sha512"
+    "C:\\Users\\小崽\\.nuget\\packages\\ppy.sdl3-cs\\2025.1205.0\\ppy.sdl3-cs.2025.1205.0.nupkg.sha512",
+    "C:\\Users\\小崽\\.nuget\\packages\\ppy.sdl3_image-cs\\2025.1205.0\\ppy.sdl3_image-cs.2025.1205.0.nupkg.sha512",
+    "C:\\Users\\小崽\\.nuget\\packages\\ppy.sdl3_ttf-cs\\2025.1205.0\\ppy.sdl3_ttf-cs.2025.1205.0.nupkg.sha512"
   ],
   "logs": []
 }
