@@ -1,0 +1,26 @@
+{
+  "clips": [
+    {
+      "id": "demo.enemy.left",
+      "fps": 8,
+      "mode": "Loop",
+      "frames": [
+        "enemyleft1.png",
+        "enemyleft2.png",
+        "enemyleft3.png",
+        "enemyleft4.png"
+      ]
+    },
+    {
+      "id": "demo.enemy.right",
+      "fps": 8,
+      "mode": "Loop",
+      "frames": [
+        "enemyright1.png",
+        "enemyright2.png",
+        "enemyright3.png",
+        "enemyright4.png"
+      ]
+    }
+  ]
+}

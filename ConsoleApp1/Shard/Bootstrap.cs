@@ -155,6 +155,7 @@ namespace Shard
                     case "asset":
                         asset = (AssetManagerBase)ob;
                         asset.registerAssets();
+                        AnimationCatalog.getInstance().initialize();
                         break;
                     case "game":
                         runningGame = (Game)ob;

@@ -16,6 +16,7 @@ namespace Shard
     class GameObject
     {
         private Transform3D transform;
+        private Animator animator;
         private bool transient;
         private bool toBeDestroyed;
         private bool visible;
@@ -80,6 +81,10 @@ namespace Shard
             get => (Transform)transform;
         }
 
+        public Animator Animator
+        {
+            get => animator;
+        }
 
         public bool Visible
         {
@@ -107,11 +112,17 @@ namespace Shard
         {
         }
 
+        internal void tickAnimation(double deltaTime)
+        {
+            animator.Update(deltaTime);
+        }
+
         public GameObject()
         {
             GameObjectManager.getInstance().addGameObject(this);
 
             transform = new Transform3D(this);
+            animator = new Animator(this);
             visible = false;
 
             ToBeDestroyed = false;

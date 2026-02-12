@@ -73,6 +73,7 @@ namespace Shard
             {
                 gob = myObjects[i];
 
+                gob.tickAnimation(Bootstrap.getDeltaTime());
                 gob.update();
 
                 gob.checkDestroyMe();
