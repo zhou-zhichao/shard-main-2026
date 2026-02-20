@@ -39,6 +39,11 @@ namespace Shard
             myListeners.Remove(il);
         }
 
+        public void clearListeners()
+        {
+            myListeners.Clear();
+        }
+
         public void informListeners(InputEvent ie, string eventType)
         {
             InputListener il;

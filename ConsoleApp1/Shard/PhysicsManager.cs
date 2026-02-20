@@ -173,6 +173,13 @@ namespace Shard
                 allPhysicsObjects.Remove(body);           
         }
 
+        public void clearAll()
+        {
+            allPhysicsObjects.Clear();
+            colliding.Clear();
+            collisionsToCheck.Clear();
+        }
+
         public void clearList(SAPEntry node)
         {
             //Let's clear everything so the garbage collector can do its

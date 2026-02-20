@@ -26,6 +26,7 @@ namespace Shard
         private static InputSystem input;
         private static PhysicsManager phys;
         private static AssetManagerBase asset;
+        private static SceneManager sceneManager;
 
         private static int targetFrameRate;
         private static int millisPerFrame;
@@ -114,6 +115,10 @@ namespace Shard
             return asset;
         }
 
+        public static SceneManager getSceneManager() {
+            return sceneManager;
+        }
+
         public static Game getRunningGame()
         {
             return runningGame;
@@ -129,6 +134,7 @@ namespace Shard
             bool bailOut = false;
 
             phys = PhysicsManager.getInstance();
+            sceneManager = SceneManager.getInstance();
 
             foreach (KeyValuePair<string, string> kvp in config)
             {
@@ -289,6 +295,9 @@ namespace Shard
 
                 // Update 
                 runningGame.update();
+
+                // Scene management update - handles per-scene updates and transitions
+                sceneManager.update();
 
                 // Input
                 // Get input, which works at 50 FPS to make sure it doesn't interfere with the 

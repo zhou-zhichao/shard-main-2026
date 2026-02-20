@@ -43,6 +43,15 @@ namespace Shard
             myObjects.Remove(gob);
         }
 
+        public void clearAll()
+        {
+            for (int i = myObjects.Count - 1; i >= 0; i--)
+            {
+                myObjects[i].killMe();
+            }
+            myObjects.Clear();
+        }
+
 
         public void physicsUpdate()
         {
