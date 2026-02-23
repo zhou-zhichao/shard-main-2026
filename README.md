@@ -3,6 +3,10 @@
 ## Some Notes
 The repo has a basic .gitignore, everyone has different dev environments setup on different machines. Although a proper Visual Studio .gitignore might be worthwhile if everyone uses visual studio, not everyone will. Hence the basic and simplistic .gitignore.
 
+## UI Demo
+The default `config.cfg` now launches `GameMissileCommand` with a UI-driven start menu.
+The main menu includes an animated enemy sprite demo, and `Settings` provides a frame limit dropdown (`30`, `60`, `120`, `Unlimited`) that applies immediately for the current run.
+
 ## ChangeLog
 
 =-=-=-=-=-=-=-=

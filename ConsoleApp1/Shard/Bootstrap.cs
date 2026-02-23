@@ -252,6 +252,25 @@ namespace Shard
             return frames;
         }
 
+        public static int getTargetFrameRate()
+        {
+            return targetFrameRate;
+        }
+
+        public static void setTargetFrameRate(int fps)
+        {
+            if (fps <= 0)
+            {
+                targetFrameRate = Int32.MaxValue;
+            }
+            else
+            {
+                targetFrameRate = fps;
+            }
+
+            millisPerFrame = 1000 / targetFrameRate;
+        }
+
         static void Main(string[] args)
         {
             long timeInMillisecondsStart, lastTick, timeInMillisecondsEnd;
