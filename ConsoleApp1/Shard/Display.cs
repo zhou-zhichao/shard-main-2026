@@ -6,6 +6,7 @@
 *   
 */
 
+using System;
 using System.Drawing;
 
 namespace Shard
@@ -13,6 +14,11 @@ namespace Shard
     abstract class Display
     {
         protected int _height, _width;
+        protected int _designWidth = 1280;
+        protected int _designHeight = 864;
+        protected float _scaleX = 1.0f;
+        protected float _scaleY = 1.0f;
+        protected bool _isFullscreen = false;
 
         public virtual void drawLine(int x, int y, int x2, int y2, int r, int g, int b, int a)
         {
@@ -57,6 +63,40 @@ namespace Shard
         public virtual void setFullscreen()
         {
         }
+
+        public virtual void toggleFullscreen()
+        {
+        }
+
+        public virtual void handleResize(int newW, int newH)
+        {
+            _width = newW;
+            _height = newH;
+            updateViewport();
+        }
+
+        public void setDesignResolution(int w, int h)
+        {
+            _designWidth = w;
+            _designHeight = h;
+            updateViewport();
+        }
+
+        protected virtual void updateViewport()
+        {
+            if (_designWidth > 0 && _designHeight > 0)
+            {
+                _scaleX = (float)_width / _designWidth;
+                _scaleY = (float)_height / _designHeight;
+            }
+        }
+
+        public int getDesignWidth() { return _designWidth; }
+        public int getDesignHeight() { return _designHeight; }
+        public float getScaleX() { return _scaleX; }
+        public float getScaleY() { return _scaleY; }
+        public bool isFullscreen() { return _isFullscreen; }
+        public virtual IntPtr getRenderer() { return IntPtr.Zero; }
 
         public virtual void addToDraw(GameObject gob)
         {

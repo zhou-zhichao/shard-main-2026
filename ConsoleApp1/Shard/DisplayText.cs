@@ -73,6 +73,8 @@ namespace Shard
     {
         protected SDL_Window* _window;
         protected SDL_Renderer* _rend;
+
+        public override IntPtr getRenderer() { return (IntPtr)_rend; }
         uint _format;
         int _access;
         private List<TextDetails> myTexts;
@@ -146,14 +148,46 @@ namespace Shard
 
         public override void setFullscreen()
         {
+            _isFullscreen = true;
             SDL_SetWindowFullscreen(_window, true);
+            syncWindowSize();
+        }
+
+        public override void toggleFullscreen()
+        {
+            _isFullscreen = !_isFullscreen;
+            SDL_SetWindowFullscreen(_window, _isFullscreen);
+            syncWindowSize();
+        }
+
+        public override void handleResize(int newW, int newH)
+        {
+            base.handleResize(newW, newH);
+        }
+
+        private void syncWindowSize()
+        {
+            int w, h;
+            SDL_GetWindowSize(_window, &w, &h);
+            _width = w;
+            _height = h;
+            updateViewport();
         }
 
         public override void initialize()
         {
             fontLibrary = new Dictionary<string, nint>();
 
-            setSize(1280, 864);
+            // Read design resolution from config, defaulting to 1280x864
+            int dw = 1280;
+            int dh = 864;
+            string cfgW = Bootstrap.getEnvironmentalVariable("design_width");
+            string cfgH = Bootstrap.getEnvironmentalVariable("design_height");
+            if (cfgW != null) int.TryParse(cfgW, out dw);
+            if (cfgH != null) int.TryParse(cfgH, out dh);
+
+            setDesignResolution(dw, dh);
+            setSize(dw, dh);
 
             SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO | SDL_InitFlags.SDL_INIT_AUDIO | SDL_InitFlags.SDL_INIT_EVENTS);
             TTF_Init();
@@ -166,6 +200,11 @@ namespace Shard
             SDL_SetWindowPosition(_window, (int)SDL_WINDOWPOS_CENTERED, (int)SDL_WINDOWPOS_CENTERED);
 
             _rend = SDL_CreateRenderer(_window, (byte*)null);
+
+            // Enable logical presentation: all rendering uses design resolution,
+            // SDL auto-scales to actual window size with letterboxing
+            SDL_SetRenderLogicalPresentation(_rend, dw, dh,
+                SDL_RendererLogicalPresentation.SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
             SDL_SetRenderDrawBlendMode(_rend, SDL_BlendMode.SDL_BLENDMODE_BLEND);
 

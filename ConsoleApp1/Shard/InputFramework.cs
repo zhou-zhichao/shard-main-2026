@@ -44,6 +44,14 @@ namespace Shard
                     return;
                 }
 
+                // Convert mouse coordinates from window pixels to design resolution space
+                // so that logical presentation scaling is accounted for
+                IntPtr rend = Bootstrap.getDisplay().getRenderer();
+                if (rend != IntPtr.Zero)
+                {
+                    SDL_ConvertEventToRenderCoordinates((SDL_Renderer*)rend, &ev);
+                }
+
                 ie = new InputEvent();
 
                 if (ev.type == (uint)SDL_EventType.SDL_EVENT_MOUSE_MOTION)
@@ -85,6 +93,23 @@ namespace Shard
                 if (ev.type == (uint)SDL_EventType.SDL_EVENT_KEY_DOWN)
                 {
                     ie.Key = (int)ev.key.scancode;
+
+                    // F11 toggles fullscreen
+                    if (ie.Key == (int)SDL_Scancode.SDL_SCANCODE_F11)
+                    {
+                        Bootstrap.getDisplay().toggleFullscreen();
+                    }
+
+                    // ESC returns to game launcher
+                    if (ie.Key == (int)SDL_Scancode.SDL_SCANCODE_ESCAPE)
+                    {
+                        if (!(Bootstrap.getRunningGame() is GameLauncher))
+                        {
+                            Bootstrap.returnToLauncher();
+                            return; // Stop processing events this frame
+                        }
+                    }
+
                     Debug.getInstance().log("Keydown: " + ie.Key);
                     informListeners(ie, "KeyDown");
                 }
@@ -93,6 +118,14 @@ namespace Shard
                 {
                     ie.Key = (int)ev.key.scancode;
                     informListeners(ie, "KeyUp");
+                }
+
+                // Handle window resize events
+                if (ev.type == (uint)SDL_EventType.SDL_EVENT_WINDOW_RESIZED)
+                {
+                    int newW = (int)ev.window.data1;
+                    int newH = (int)ev.window.data2;
+                    Bootstrap.getDisplay().handleResize(newW, newH);
                 }
 
                 if (ev.type == (uint)SDL_EventType.SDL_EVENT_QUIT)

@@ -9,8 +9,6 @@ namespace Shard
     {
         private enum GameState
         {
-            MainMenu,
-            Settings,
             Playing,
             GameOver
         }
@@ -22,9 +20,7 @@ namespace Shard
         private int missileChance = 1;
         private const double legacyReferenceFps = 1000.0;
         private static bool logIncomingSpawnEvents = false;
-        private UISystem uiSystem;
         private GameState state;
-        private DemoEnemy menuEnemy;
 
         public override int getTargetFrameRate()
         {
@@ -42,12 +38,6 @@ namespace Shard
 
             switch (state)
             {
-                case GameState.MainMenu:
-                    uiSystem.Render();
-                    return;
-                case GameState.Settings:
-                    uiSystem.Render();
-                    return;
                 case GameState.Playing:
                     runGameplay();
                     return;
@@ -133,91 +123,13 @@ namespace Shard
             Bootstrap.getInput().addListener(this);
 
             counter = 0;
-            state = GameState.MainMenu;
             rand = new Random();
             cities = new List<City>();
             myArsenals = new List<Arsenal>();
 
-            uiSystem = new UISystem();
-            uiSystem.LoadFromAsset("ui_layouts_missile.json");
-
-            uiSystem.BindButtonAction("start_game", StartGame);
-            uiSystem.BindButtonAction("open_settings", OpenSettings);
-            uiSystem.BindButtonAction("exit_game", ExitGame);
-            uiSystem.BindButtonAction("back_main", EnterMainMenu);
-            uiSystem.BindDropdownAction("set_frame_limit", ApplyFrameLimit);
-
-            Bootstrap.setTargetFrameRate(60);
-            EnterMainMenu();
-        }
-
-        private void EnterMainMenu()
-        {
-            state = GameState.MainMenu;
-            uiSystem.SetScreen("main_menu");
-            CreateMenuEnemy();
-        }
-
-        private void OpenSettings()
-        {
-            destroyMenuEnemy();
-            state = GameState.Settings;
-            uiSystem.SetScreen("settings");
-        }
-
-        private void StartGame()
-        {
-            destroyMenuEnemy();
+            // Go straight into gameplay (menu is handled by GameLauncher)
             createGameplayWorld();
-            counter = 0;
             state = GameState.Playing;
-        }
-
-        private void ExitGame()
-        {
-            Environment.Exit(0);
-        }
-
-        private void ApplyFrameLimit(string selectedOption)
-        {
-            if (string.IsNullOrWhiteSpace(selectedOption))
-            {
-                return;
-            }
-
-            if (selectedOption.Equals("Unlimited", StringComparison.OrdinalIgnoreCase))
-            {
-                Bootstrap.setTargetFrameRate(0);
-                return;
-            }
-
-            if (Int32.TryParse(selectedOption, out int fps))
-            {
-                Bootstrap.setTargetFrameRate(fps);
-            }
-        }
-
-        private void CreateMenuEnemy()
-        {
-            if (menuEnemy != null && menuEnemy.ToBeDestroyed == false)
-            {
-                return;
-            }
-
-            menuEnemy = new DemoEnemy();
-        }
-
-        private void destroyMenuEnemy()
-        {
-            if (menuEnemy == null)
-            {
-                return;
-            }
-
-            if (menuEnemy.ToBeDestroyed == false)
-            {
-                menuEnemy.ToBeDestroyed = true;
-            }
         }
 
         private bool hasLivingCities()
@@ -325,11 +237,6 @@ namespace Shard
 
         public void handleInput(InputEvent inp, string eventType)
         {
-            if (state == GameState.MainMenu || state == GameState.Settings)
-            {
-                uiSystem.HandleInput(inp, eventType);
-                return;
-            }
 
             if (state != GameState.Playing)
             {

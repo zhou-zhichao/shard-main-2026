@@ -119,9 +119,35 @@ namespace Shard
             return sceneManager;
         }
 
+        public static int getDesignWidth() { return displayEngine.getDesignWidth(); }
+        public static int getDesignHeight() { return displayEngine.getDesignHeight(); }
+        public static float getScaleX() { return displayEngine.getScaleX(); }
+        public static float getScaleY() { return displayEngine.getScaleY(); }
+
         public static Game getRunningGame()
         {
             return runningGame;
+        }
+
+        public static void setRunningGame(Game game)
+        {
+            runningGame = game;
+        }
+
+        public static void returnToLauncher()
+        {
+            // Clean up current game state
+            GameObjectManager.getInstance().clearAll();
+            PhysicsManager.getInstance().clearAll();
+            input.clearListeners();
+            displayEngine.clearDisplay();
+            sceneManager.reset();
+
+            // Create and start a fresh launcher
+            GameLauncher launcher = new GameLauncher();
+            runningGame = launcher;
+            setTargetFrameRate(launcher.getTargetFrameRate());
+            launcher.initialize();
         }
 
         public static void setup(string path)

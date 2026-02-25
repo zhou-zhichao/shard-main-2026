@@ -17,7 +17,7 @@ namespace Shard
             rightMargin = 80.0f;
 
             Transform.X = leftBoundary;
-            Transform.Y = 420.0f;
+            Transform.Y = 820.0f;
 
             Animator.RegisterCodeClip(new AnimationClip(
                 "demo.enemy.left",
@@ -42,7 +42,7 @@ namespace Shard
 
             Transform.translate(speed * direction * deltaTime, 0);
 
-            float rightBoundary = Bootstrap.getDisplay().getWidth() - rightMargin - Transform.Wid;
+            float rightBoundary = Bootstrap.getDesignWidth() - rightMargin - Transform.Wid;
 
             if (rightBoundary < leftBoundary)
             {

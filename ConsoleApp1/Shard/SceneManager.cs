@@ -102,5 +102,19 @@ namespace Shard
             // 4. Initialize the new scene
             currentScene.initialize();
         }
+
+        /// <summary>
+        /// Resets the scene manager, clearing current and pending scenes.
+        /// Used when returning to the game launcher.
+        /// </summary>
+        public void reset()
+        {
+            if (currentScene != null)
+            {
+                currentScene.onExit();
+            }
+            currentScene = null;
+            pendingScene = null;
+        }
     }
 }
