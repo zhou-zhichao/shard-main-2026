@@ -2,7 +2,7 @@
   "version": 3,
   "targets": {
     "net9.0": {
-      "ppy.SDL3-CS/2025.1205.0": {
+      "ppy.SDL3-CS/2026.302.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/SDL3-CS.dll": {
@@ -89,10 +89,10 @@
           }
         }
       },
-      "ppy.SDL3_image-CS/2025.1205.0": {
+      "ppy.SDL3_image-CS/2026.302.0": {
         "type": "package",
         "dependencies": {
-          "ppy.SDL3-CS": "2025.1205.0"
+          "ppy.SDL3-CS": "2026.302.0"
         },
         "compile": {
           "lib/net8.0/SDL3_image-CS.dll": {
@@ -179,10 +179,100 @@
           }
         }
       },
-      "ppy.SDL3_ttf-CS/2025.1205.0": {
+      "ppy.SDL3_mixer-CS/2026.302.0": {
         "type": "package",
         "dependencies": {
-          "ppy.SDL3-CS": "2025.1205.0"
+          "ppy.SDL3-CS": "2026.302.0"
+        },
+        "compile": {
+          "lib/net8.0/SDL3_mixer-CS.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/SDL3_mixer-CS.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/android-arm/native/libSDL3_mixer.so": {
+            "assetType": "native",
+            "rid": "android-arm"
+          },
+          "runtimes/android-arm64/native/libSDL3_mixer.so": {
+            "assetType": "native",
+            "rid": "android-arm64"
+          },
+          "runtimes/android-x64/native/libSDL3_mixer.so": {
+            "assetType": "native",
+            "rid": "android-x64"
+          },
+          "runtimes/android-x86/native/libSDL3_mixer.so": {
+            "assetType": "native",
+            "rid": "android-x86"
+          },
+          "runtimes/ios/native/SDL3_mixer.xcframework/Info.plist": {
+            "assetType": "native",
+            "rid": "ios"
+          },
+          "runtimes/ios/native/SDL3_mixer.xcframework/ios-arm64/SDL3_mixer.framework/Info.plist": {
+            "assetType": "native",
+            "rid": "ios"
+          },
+          "runtimes/ios/native/SDL3_mixer.xcframework/ios-arm64/SDL3_mixer.framework/SDL3_mixer": {
+            "assetType": "native",
+            "rid": "ios"
+          },
+          "runtimes/ios/native/SDL3_mixer.xcframework/ios-arm64_x86_64-simulator/SDL3_mixer.framework/Info.plist": {
+            "assetType": "native",
+            "rid": "ios"
+          },
+          "runtimes/ios/native/SDL3_mixer.xcframework/ios-arm64_x86_64-simulator/SDL3_mixer.framework/SDL3_mixer": {
+            "assetType": "native",
+            "rid": "ios"
+          },
+          "runtimes/linux-arm/native/libSDL3_mixer.so": {
+            "assetType": "native",
+            "rid": "linux-arm"
+          },
+          "runtimes/linux-arm64/native/libSDL3_mixer.so": {
+            "assetType": "native",
+            "rid": "linux-arm64"
+          },
+          "runtimes/linux-x64/native/libSDL3_mixer.so": {
+            "assetType": "native",
+            "rid": "linux-x64"
+          },
+          "runtimes/linux-x86/native/libSDL3_mixer.so": {
+            "assetType": "native",
+            "rid": "linux-x86"
+          },
+          "runtimes/osx-arm64/native/libSDL3_mixer.dylib": {
+            "assetType": "native",
+            "rid": "osx-arm64"
+          },
+          "runtimes/osx-x64/native/libSDL3_mixer.dylib": {
+            "assetType": "native",
+            "rid": "osx-x64"
+          },
+          "runtimes/win-arm64/native/SDL3_mixer.dll": {
+            "assetType": "native",
+            "rid": "win-arm64"
+          },
+          "runtimes/win-x64/native/SDL3_mixer.dll": {
+            "assetType": "native",
+            "rid": "win-x64"
+          },
+          "runtimes/win-x86/native/SDL3_mixer.dll": {
+            "assetType": "native",
+            "rid": "win-x86"
+          }
+        }
+      },
+      "ppy.SDL3_ttf-CS/2026.302.0": {
+        "type": "package",
+        "dependencies": {
+          "ppy.SDL3-CS": "2026.302.0"
         },
         "compile": {
           "lib/net8.0/SDL3_ttf-CS.dll": {
@@ -272,10 +362,10 @@
     }
   },
   "libraries": {
-    "ppy.SDL3-CS/2025.1205.0": {
-      "sha512": "5KMnrH5NXzqxDmdm2UOeCYfCh/Djh0TJQeGRtWhRaeU7yOZyN1GoqgPWIm0bXUtk9DKk3Cl4u0dkTlhGjn/s8w==",
+    "ppy.SDL3-CS/2026.302.0": {
+      "sha512": "M+t57dc3pAlkJAyVSqk/Rdxcf57yxVP9xN9CJejRn/t+3YsRM7Frv4HI7/bDhTvA639aqCbAOI4ECDFR5sx9bA==",
       "type": "package",
-      "path": "ppy.sdl3-cs/2025.1205.0",
+      "path": "ppy.sdl3-cs/2026.302.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -285,7 +375,7 @@
         "lib/net8.0-android34.0/SDL3-CS.xml",
         "lib/net8.0/SDL3-CS.dll",
         "lib/net8.0/SDL3-CS.xml",
-        "ppy.sdl3-cs.2025.1205.0.nupkg.sha512",
+        "ppy.sdl3-cs.2026.302.0.nupkg.sha512",
         "ppy.sdl3-cs.nuspec",
         "runtimes/android-arm/native/libSDL3.so",
         "runtimes/android-arm64/native/libSDL3.so",
@@ -307,10 +397,10 @@
         "runtimes/win-x86/native/SDL3.dll"
       ]
     },
-    "ppy.SDL3_image-CS/2025.1205.0": {
-      "sha512": "fHgoL6tabnaIkzu0B/lDuxa1m5HLsZETBSrdEYi/JETK9XB+RqVOZ4tjQ7fE50LpX3YWS0PTInlXyTQagUpEdA==",
+    "ppy.SDL3_image-CS/2026.302.0": {
+      "sha512": "u+bn7hId/PjEpK0G2Sf1ijhKkSwEnNxWOJV7xjN1whR18FPjuQ9rVxRfhsm7guTU6GNSQZx2SZ/bHTBRZCdDhA==",
       "type": "package",
-      "path": "ppy.sdl3_image-cs/2025.1205.0",
+      "path": "ppy.sdl3_image-cs/2026.302.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -319,7 +409,7 @@
         "lib/net8.0-android34.0/SDL3_image-CS.xml",
         "lib/net8.0/SDL3_image-CS.dll",
         "lib/net8.0/SDL3_image-CS.xml",
-        "ppy.sdl3_image-cs.2025.1205.0.nupkg.sha512",
+        "ppy.sdl3_image-cs.2026.302.0.nupkg.sha512",
         "ppy.sdl3_image-cs.nuspec",
         "runtimes/android-arm/native/libSDL3_image.so",
         "runtimes/android-arm64/native/libSDL3_image.so",
@@ -341,10 +431,44 @@
         "runtimes/win-x86/native/SDL3_image.dll"
       ]
     },
-    "ppy.SDL3_ttf-CS/2025.1205.0": {
-      "sha512": "Ec3Del/4q7+XU6zNqyThAGvkLnGjGCKHY3Ivcj5LfjASlbNpsX8Qc3BUMm4ioKa8cLsZ9FzBTB84GswF2HS2TQ==",
+    "ppy.SDL3_mixer-CS/2026.302.0": {
+      "sha512": "WSF60SuYYnJmLp9ByzAunl4yJBXHXEcXIFxnozR7p1CIFqt6IknlPu8NQSi27/P7j5nV+1VZAfrvvuTzly6RuA==",
       "type": "package",
-      "path": "ppy.sdl3_ttf-cs/2025.1205.0",
+      "path": "ppy.sdl3_mixer-cs/2026.302.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README_nuget.md",
+        "lib/net8.0-android34.0/SDL3_mixer-CS.dll",
+        "lib/net8.0-android34.0/SDL3_mixer-CS.xml",
+        "lib/net8.0/SDL3_mixer-CS.dll",
+        "lib/net8.0/SDL3_mixer-CS.xml",
+        "ppy.sdl3_mixer-cs.2026.302.0.nupkg.sha512",
+        "ppy.sdl3_mixer-cs.nuspec",
+        "runtimes/android-arm/native/libSDL3_mixer.so",
+        "runtimes/android-arm64/native/libSDL3_mixer.so",
+        "runtimes/android-x64/native/libSDL3_mixer.so",
+        "runtimes/android-x86/native/libSDL3_mixer.so",
+        "runtimes/ios/native/SDL3_mixer.xcframework/Info.plist",
+        "runtimes/ios/native/SDL3_mixer.xcframework/ios-arm64/SDL3_mixer.framework/Info.plist",
+        "runtimes/ios/native/SDL3_mixer.xcframework/ios-arm64/SDL3_mixer.framework/SDL3_mixer",
+        "runtimes/ios/native/SDL3_mixer.xcframework/ios-arm64_x86_64-simulator/SDL3_mixer.framework/Info.plist",
+        "runtimes/ios/native/SDL3_mixer.xcframework/ios-arm64_x86_64-simulator/SDL3_mixer.framework/SDL3_mixer",
+        "runtimes/linux-arm/native/libSDL3_mixer.so",
+        "runtimes/linux-arm64/native/libSDL3_mixer.so",
+        "runtimes/linux-x64/native/libSDL3_mixer.so",
+        "runtimes/linux-x86/native/libSDL3_mixer.so",
+        "runtimes/osx-arm64/native/libSDL3_mixer.dylib",
+        "runtimes/osx-x64/native/libSDL3_mixer.dylib",
+        "runtimes/win-arm64/native/SDL3_mixer.dll",
+        "runtimes/win-x64/native/SDL3_mixer.dll",
+        "runtimes/win-x86/native/SDL3_mixer.dll"
+      ]
+    },
+    "ppy.SDL3_ttf-CS/2026.302.0": {
+      "sha512": "K+wVvWLd4aYfBcWCdUI0kTQmIIcL8N+1cE+phkiE1zPGhn5J1KsaPZwpqaBqd3yY3RF9WE9fMSEzQn2K7sxdRg==",
+      "type": "package",
+      "path": "ppy.sdl3_ttf-cs/2026.302.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -353,7 +477,7 @@
         "lib/net8.0-android34.0/SDL3_ttf-CS.xml",
         "lib/net8.0/SDL3_ttf-CS.dll",
         "lib/net8.0/SDL3_ttf-CS.xml",
-        "ppy.sdl3_ttf-cs.2025.1205.0.nupkg.sha512",
+        "ppy.sdl3_ttf-cs.2026.302.0.nupkg.sha512",
         "ppy.sdl3_ttf-cs.nuspec",
         "runtimes/android-arm/native/libSDL3_ttf.so",
         "runtimes/android-arm64/native/libSDL3_ttf.so",
@@ -380,27 +504,28 @@
     "net9.0": [
       "ppy.SDL3-CS >= *",
       "ppy.SDL3_image-CS >= *",
+      "ppy.SDL3_mixer-CS >= *",
       "ppy.SDL3_ttf-CS >= *"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\gswzd\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\小崽\\.nuget\\packages\\": {},
+    "E:\\Visual Studio Community2022 shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Shard\\shard-main-2026\\ConsoleApp1\\Shard.csproj",
+      "projectUniqueName": "F:\\default\\桌面\\game engine\\shard-main-2026\\ConsoleApp1\\Shard.csproj",
       "projectName": "Shard",
-      "projectPath": "D:\\Shard\\shard-main-2026\\ConsoleApp1\\Shard.csproj",
-      "packagesPath": "C:\\Users\\gswzd\\.nuget\\packages\\",
-      "outputPath": "D:\\Shard\\shard-main-2026\\ConsoleApp1\\obj\\",
+      "projectPath": "F:\\default\\桌面\\game engine\\shard-main-2026\\ConsoleApp1\\Shard.csproj",
+      "packagesPath": "C:\\Users\\小崽\\.nuget\\packages\\",
+      "outputPath": "F:\\default\\桌面\\game engine\\shard-main-2026\\ConsoleApp1\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        "E:\\Visual Studio Community2022 shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\gswzd\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\小崽\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -427,7 +552,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "10.0.100"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net9.0": {
@@ -438,6 +563,10 @@
             "version": "[*, )"
           },
           "ppy.SDL3_image-CS": {
+            "target": "Package",
+            "version": "[*, )"
+          },
+          "ppy.SDL3_mixer-CS": {
             "target": "Package",
             "version": "[*, )"
           },
@@ -462,7 +591,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.311/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
