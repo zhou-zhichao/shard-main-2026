@@ -58,10 +58,6 @@
               "target": "Package",
               "version": "[*, )"
             },
-            "ppy.SDL3_mixer-CS": {
-              "target": "Package",
-              "version": "[*, )"
-            },
             "ppy.SDL3_ttf-CS": {
               "target": "Package",
               "version": "[*, )"

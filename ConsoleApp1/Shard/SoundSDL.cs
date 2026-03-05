@@ -74,8 +74,8 @@ namespace Shard
             }
 
             SDL_AudioSpec spec;
-            byte* buffer;
-            uint length;
+            byte* buffer = null;
+            uint length = 0;
 
             file = Bootstrap.getAssetManager().getAssetPath(file);
             Console.WriteLine("Try to play sound: " + file);

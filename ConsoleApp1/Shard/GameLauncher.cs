@@ -6,6 +6,7 @@
 
 using System;
 using System.Drawing;
+using ScoreDemo;
 
 namespace Shard
 {
@@ -37,6 +38,7 @@ namespace Shard
             uiSystem.BindButtonAction("open_settings", OpenSettings);
             uiSystem.BindButtonAction("exit_game", ExitGame);
             uiSystem.BindButtonAction("back_main", EnterMainMenu);
+            uiSystem.BindButtonAction("show_scores", ShowScoreSystem);
 
             // Settings actions
             uiSystem.BindDropdownAction("set_frame_limit", ApplyFrameLimit);
@@ -89,6 +91,13 @@ namespace Shard
             DestroyMenuEnemy();
             state = LauncherState.GameSelect;
             uiSystem.SetScreen("game_select");
+        }
+
+        private void ShowScoreSystem()
+        {
+            DestroyMenuEnemy();
+            Bootstrap.getInput().removeListener(this);
+            Bootstrap.getSceneManager().loadScene(new ScoreUI());
         }
 
         private void ExitGame()

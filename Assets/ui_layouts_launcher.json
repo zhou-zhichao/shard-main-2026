@@ -22,10 +22,21 @@
           "fontSize": 24
         },
         {
-          "id": "start_button",
+          "id": "scores_button",
           "type": "button",
           "x": 460,
           "y": 320,
+          "width": 360,
+          "height": 72,
+          "text": "High Scores",
+          "fontSize": 30,
+          "action": "show_scores"
+        },
+        {
+          "id": "start_button",
+          "type": "button",
+          "x": 460,
+          "y": 425,
           "width": 360,
           "height": 72,
           "text": "Start",
