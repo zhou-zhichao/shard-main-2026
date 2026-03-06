@@ -14,6 +14,7 @@ namespace GameTest
         private UISystem pauseUi;
         private List<DemoPickup> pickups;
         private List<DemoSlime> enemies;
+        private List<DemoMushroom> mushrooms;
         private float exitHintTimer;
         private bool transitionPending;
         private bool pauseSettingsOpen;
@@ -35,6 +36,7 @@ namespace GameTest
             isMuted = false;
             pickups = new List<DemoPickup>();
             enemies = new List<DemoSlime>();
+            mushrooms = new List<DemoMushroom>();
 
             Bootstrap.getDisplay().setClearColor(level.BackgroundColor);
             Bootstrap.getInput().addListener(this);
@@ -60,6 +62,11 @@ namespace GameTest
                 renderVolumeHint();
             }
 
+            foreach (DemoMushroom mushroom in mushrooms)
+            {
+                mushroom.UpdateSpatialAudio(player.CenterX, player.CenterY);
+            }
+
             if (pauseUi != null && DemoRunState.Paused)
             {
                 Bootstrap.getDisplay().drawFilledRect(0, 0, Bootstrap.getDisplay().getDesignWidth(), Bootstrap.getDisplay().getDesignHeight(), 0, 0, 0, 160);
@@ -73,6 +80,12 @@ namespace GameTest
             Bootstrap.getDisplay().setClearColor(0, 0, 0, 255);
             Bootstrap.getInput().removeListener(this);
             Bootstrap.getSound().StopMusic();
+            Bootstrap.getSound().ResumeAll();
+
+            foreach (DemoMushroom mushroom in mushrooms)
+            {
+                mushroom.StopSound();
+            }
         }
 
         public void handleInput(InputEvent inp, string eventType)
@@ -142,10 +155,9 @@ namespace GameTest
 
         private void adjustVolume(float delta)
         {
-            float newVolume = Bootstrap.getSound().MusicVolume + delta;
+            float newVolume = Bootstrap.getSound().MasterVolume + delta;
             newVolume = Math.Clamp(newVolume, 0.0f, 1.0f);
-            Bootstrap.getSound().MusicVolume = newVolume;
-            Bootstrap.getSound().EffectsVolume = newVolume;
+            Bootstrap.getSound().MasterVolume = newVolume;
             volumeHintTimer = 2.0f;
         }
 
@@ -154,13 +166,11 @@ namespace GameTest
             isMuted = !isMuted;
             if (isMuted)
             {
-                Bootstrap.getSound().MusicVolume = 0;
-                Bootstrap.getSound().EffectsVolume = 0;
+                Bootstrap.getSound().MasterVolume = 0;
             }
             else
             {
-                Bootstrap.getSound().MusicVolume = 1.0f;
-                Bootstrap.getSound().EffectsVolume = 1.0f;
+                Bootstrap.getSound().MasterVolume = 1.0f;
             }
             volumeHintTimer = 2.0f;
         }
@@ -248,6 +258,12 @@ namespace GameTest
             pauseSettingsOpen = false;
             player?.ClearInput();
             pauseUi.SetScreen("pause_menu");
+            Bootstrap.getSound().PauseAll();
+
+            foreach (DemoMushroom mushroom in mushrooms)
+            {
+                mushroom.PauseSound();
+            }
         }
 
         private void openPauseSettings()
@@ -256,12 +272,24 @@ namespace GameTest
             pauseSettingsOpen = true;
             pauseUi.SetScreen("pause_settings");
             DemoSettings.SyncCurrentScreen(pauseUi);
+            Bootstrap.getSound().PauseAll();
+
+            foreach (DemoMushroom mushroom in mushrooms)
+            {
+                mushroom.PauseSound();
+            }
         }
 
         private void resumeDemo()
         {
             pauseSettingsOpen = false;
             DemoRunState.SetPaused(false);
+            Bootstrap.getSound().ResumeAll();
+
+            foreach (DemoMushroom mushroom in mushrooms)
+            {
+                mushroom.ResumeSound();
+            }
         }
 
         private void spawnWorld()
@@ -290,6 +318,14 @@ namespace GameTest
                 DemoSlime slime = new DemoSlime();
                 slime.Configure(this, enemy);
                 enemies.Add(slime);
+            }
+
+            foreach (DemoMushroomPlacement mushroom in level.Mushrooms)
+            {
+                DemoMushroom mush = new DemoMushroom();
+                mush.Configure(mushroom);
+                mush.StartSound();
+                mushrooms.Add(mush);
             }
 
             exitPortal = new DemoExitPortal();
@@ -352,7 +388,7 @@ namespace GameTest
         private void renderVolumeHint()
         {
             Display display = Bootstrap.getDisplay();
-            int volumePercent = (int)(Bootstrap.getSound().MusicVolume * 100);
+            int volumePercent = (int)(Bootstrap.getSound().MasterVolume * 100);
 
             if (isMuted)
             {
@@ -360,7 +396,7 @@ namespace GameTest
             }
             else
             {
-                display.showText("Volume: " + volumePercent + "% (+/- to adjust, M to mute)", 500, 50, 20, 255, 255, 100);
+                display.showText("Master Volume: " + volumePercent + "% (+/- to adjust, M to mute)", 500, 50, 20, 255, 255, 100);
             }
         }
 

@@ -356,6 +356,24 @@ namespace GameTest
             }
         }
 
+        public float CenterX
+        {
+            get
+            {
+                RectangleF bounds = Bounds;
+                return bounds.X + (bounds.Width / 2.0f);
+            }
+        }
+
+        public float CenterY
+        {
+            get
+            {
+                RectangleF bounds = Bounds;
+                return bounds.Y + (bounds.Height / 2.0f);
+            }
+        }
+
         public void Configure(DemoLevelScene ownerScene, float x, float y)
         {
             configured = true;
@@ -565,6 +583,110 @@ namespace GameTest
             }
 
             Animator.Play("demo.knight.idle");
+        }
+    }
+
+    class DemoMushroom : GameObject
+    {
+        private float x;
+        private float y;
+        private float scale;
+        private float maxDistance;
+        private string soundAsset;
+        private int trackHandle;
+        private bool isPlaying;
+
+        public float X => x;
+        public float Y => y;
+
+        public void Configure(DemoMushroomPlacement placement)
+        {
+            x = placement.X;
+            y = placement.Y;
+            scale = placement.Scale;
+            maxDistance = placement.MaxDistance;
+            soundAsset = placement.SoundAsset;
+
+            Transform.X = x;
+            Transform.Y = y;
+            Transform.Scalex = scale;
+            Transform.Scaley = scale;
+
+            // Use filename only (AssetManager registers by filename without path)
+            string texturePath = Bootstrap.getAssetManager().getAssetPath("world_tileset.png");
+            Transform.SpritePath = texturePath;
+            Transform.SetSpriteSourceRect(16, 0, 16, 16);
+            Transform.Wid = 16;
+            Transform.Ht = 16;
+
+            isPlaying = false;
+        }
+
+        public void StartSound()
+        {
+            if (!isPlaying)
+            {
+                const float baseVolume = 10.0f;
+                trackHandle = Bootstrap.getSound().playSoundWithHandle(soundAsset, baseVolume, true);
+                if (trackHandle >= 0)
+                {
+                    Bootstrap.getSound().setTrackVolume(trackHandle, 0.0f);
+                    isPlaying = true;
+                }
+            }
+        }
+
+        public void StopSound()
+        {
+            if (isPlaying)
+            {
+                Bootstrap.getSound().stopTrack(trackHandle);
+                isPlaying = false;
+            }
+        }
+
+        public void PauseSound()
+        {
+            if (isPlaying && trackHandle >= 0)
+            {
+                Bootstrap.getSound().setTrackVolume(trackHandle, 0.0f);
+            }
+        }
+
+        public void ResumeSound()
+        {
+            // Volume will be restored by next UpdateSpatialAudio call
+        }
+
+        public void UpdateSpatialAudio(float playerX, float playerY)
+        {
+            if (!isPlaying)
+            {
+                return;
+            }
+
+            float dx = playerX - (x + 12);
+            float dy = playerY - (y + 12);
+            float distance = (float)Math.Sqrt(dx * dx + dy * dy);
+
+            float volume;
+            if (distance >= maxDistance)
+            {
+                volume = 0.0f;
+            }
+            else
+            {
+                // Use linear falloff for more audible volume
+                volume = 1.0f - (distance / maxDistance);
+            }
+
+            const float baseVolume = 0.5f;
+            Bootstrap.getSound().setTrackVolume(trackHandle, volume * baseVolume);
+        }
+
+        public override void update()
+        {
+            Bootstrap.getDisplay().addToDraw(this);
         }
     }
 }

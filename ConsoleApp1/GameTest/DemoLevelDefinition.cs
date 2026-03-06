@@ -40,6 +40,15 @@ namespace GameTest
         public float Scale { get; set; }
     }
 
+    class DemoMushroomPlacement
+    {
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Scale { get; set; }
+        public string SoundAsset { get; set; }
+        public float MaxDistance { get; set; }
+    }
+
     class DemoGroundBand
     {
         public RectangleF Bounds { get; set; }
@@ -66,6 +75,7 @@ namespace GameTest
         public List<RectangleF> Solids { get; set; } = new List<RectangleF>();
         public List<DemoPickupPlacement> Pickups { get; set; } = new List<DemoPickupPlacement>();
         public List<DemoEnemyPlacement> Enemies { get; set; } = new List<DemoEnemyPlacement>();
+        public List<DemoMushroomPlacement> Mushrooms { get; set; } = new List<DemoMushroomPlacement>();
     }
 
     static class DemoLevelCatalog
@@ -177,6 +187,15 @@ namespace GameTest
             level.Enemies.Add(new DemoEnemyPlacement { X = 300, Y = 744, MinX = 224, MaxX = 384, Speed = 100, Scale = 2.5f });
             level.Enemies.Add(new DemoEnemyPlacement { X = 656, Y = 744, MinX = 576, MaxX = 736, Speed = 110, Scale = 2.5f });
             level.Enemies.Add(new DemoEnemyPlacement { X = 878, Y = 438, MinX = 846, MaxX = 918, Speed = 120, Scale = 2.5f });
+
+            level.Mushrooms.Add(new DemoMushroomPlacement
+            {
+                X = 676,
+                Y = 536,
+                Scale = 3.0f,
+                SoundAsset = "beep_loop.wav",
+                MaxDistance = 400.0f
+            });
 
             level.ExitBounds = new RectangleF(1184, 272, 56, 96);
             level.ExitVisual = new DemoTilePlacement

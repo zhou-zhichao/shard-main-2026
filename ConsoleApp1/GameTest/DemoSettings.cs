@@ -6,11 +6,13 @@ namespace GameTest
     {
         public const string FrameLimitAction = "set_frame_limit";
         public const string WindowSizeAction = "set_window_size";
+        public const string MasterVolumeAction = "set_master_volume";
         public const string MusicVolumeAction = "set_music_volume";
         public const string SfxVolumeAction = "set_sfx_volume";
 
         private static string currentFrameLimit = "60";
         private static string currentWindowSize = "1280x864";
+        private static string currentMasterVolume = "100%";
         private static string currentMusicVolume = "80%";
         private static string currentSfxVolume = "100%";
 
@@ -23,6 +25,7 @@ namespace GameTest
 
             uiSystem.BindDropdownAction(FrameLimitAction, ApplyFrameLimit);
             uiSystem.BindDropdownAction(WindowSizeAction, ApplyWindowSize);
+            uiSystem.BindDropdownAction(MasterVolumeAction, ApplyMasterVolume);
             uiSystem.BindDropdownAction(MusicVolumeAction, ApplyMusicVolume);
             uiSystem.BindDropdownAction(SfxVolumeAction, ApplySfxVolume);
         }
@@ -36,6 +39,7 @@ namespace GameTest
 
             uiSystem.SetDropdownSelectedOption("frame_limit_dropdown", currentFrameLimit);
             uiSystem.SetDropdownSelectedOption("window_size_dropdown", currentWindowSize);
+            uiSystem.SetDropdownSelectedOption("master_volume_dropdown", currentMasterVolume);
             uiSystem.SetDropdownSelectedOption("music_volume_dropdown", currentMusicVolume);
             uiSystem.SetDropdownSelectedOption("sfx_volume_dropdown", currentSfxVolume);
         }
@@ -43,6 +47,7 @@ namespace GameTest
         public static void ApplyCurrentRuntimeValues()
         {
             Shard.Bootstrap.setTargetFrameRate(GetTargetFrameRate());
+            Shard.Bootstrap.getSound().MasterVolume = ParsePercentage(currentMasterVolume, 1.0f);
             Shard.Bootstrap.getSound().MusicVolume = ParsePercentage(currentMusicVolume, 0.8f);
             Shard.Bootstrap.getSound().EffectsVolume = ParsePercentage(currentSfxVolume, 1.0f);
         }
@@ -102,6 +107,12 @@ namespace GameTest
 
             Shard.Bootstrap.getDisplay().setFullscreen(false);
             Shard.Bootstrap.getDisplay().setWindowSize(width, height);
+        }
+
+        private static void ApplyMasterVolume(string option)
+        {
+            currentMasterVolume = option;
+            Shard.Bootstrap.getSound().MasterVolume = ParsePercentage(option, 1.0f);
         }
 
         private static void ApplyMusicVolume(string option)
