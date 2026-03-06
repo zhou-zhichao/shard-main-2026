@@ -103,7 +103,8 @@ namespace Shard
                     // ESC returns to game launcher
                     if (ie.Key == (int)SDL_Scancode.SDL_SCANCODE_ESCAPE)
                     {
-                        if (!(Bootstrap.getRunningGame() is GameLauncher))
+                        if (!(Bootstrap.getRunningGame() is GameLauncher) &&
+                            Bootstrap.getRunningGame().useGlobalLauncherEscapeShortcut())
                         {
                             Bootstrap.returnToLauncher();
                             return; // Stop processing events this frame

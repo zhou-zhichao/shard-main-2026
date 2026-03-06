@@ -15,6 +15,8 @@ namespace Shard
         private string text;
         private int fontSize;
         private string actionId;
+        private string anchorX;
+        private string anchorY;
 
         public UIElement()
         {
@@ -29,6 +31,8 @@ namespace Shard
             text = "";
             fontSize = 20;
             actionId = "";
+            anchorX = "left";
+            anchorY = "top";
         }
 
         public virtual void Render()
@@ -47,7 +51,7 @@ namespace Shard
                 return false;
             }
 
-            return px >= X && px <= X + Width && py >= Y && py <= Y + Height;
+            return px >= ResolvedX && px <= ResolvedX + Width && py >= ResolvedY && py <= ResolvedY + Height;
         }
 
         protected static void DrawRect(int x, int y, int width, int height, int r, int g, int b, int a)
@@ -57,6 +61,7 @@ namespace Shard
                 return;
             }
 
+            Bootstrap.getDisplay().drawFilledRect(x, y, width, height, r / 2, g / 2, b / 2, Math.Min(a, 210));
             Bootstrap.getDisplay().drawLine(x, y, x + width, y, r, g, b, a);
             Bootstrap.getDisplay().drawLine(x + width, y, x + width, y + height, r, g, b, a);
             Bootstrap.getDisplay().drawLine(x + width, y + height, x, y + height, r, g, b, a);
@@ -84,5 +89,39 @@ namespace Shard
         public string Text { get => text; set => text = value; }
         public int FontSize { get => fontSize; set => fontSize = value; }
         public string ActionId { get => actionId; set => actionId = value; }
+        public string AnchorX { get => anchorX; set => anchorX = string.IsNullOrWhiteSpace(value) ? "left" : value.Trim().ToLowerInvariant(); }
+        public string AnchorY { get => anchorY; set => anchorY = string.IsNullOrWhiteSpace(value) ? "top" : value.Trim().ToLowerInvariant(); }
+        public int ResolvedX { get => resolveX(); }
+        public int ResolvedY { get => resolveY(); }
+
+        private int resolveX()
+        {
+            int designWidth = Bootstrap.getDisplay().getDesignWidth();
+
+            switch (AnchorX)
+            {
+                case "center":
+                    return (designWidth / 2) + X;
+                case "right":
+                    return designWidth - Width + X;
+                default:
+                    return X;
+            }
+        }
+
+        private int resolveY()
+        {
+            int designHeight = Bootstrap.getDisplay().getDesignHeight();
+
+            switch (AnchorY)
+            {
+                case "middle":
+                    return (designHeight / 2) + Y;
+                case "bottom":
+                    return designHeight - Height + Y;
+                default:
+                    return Y;
+            }
+        }
     }
 }

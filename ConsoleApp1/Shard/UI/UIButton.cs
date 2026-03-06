@@ -45,10 +45,10 @@ namespace Shard
                 b = 100;
             }
 
-            DrawRect(X, Y, Width, Height, r, g, b, 255);
+            DrawRect(ResolvedX, ResolvedY, Width, Height, r, g, b, 255);
 
-            int textY = Y + Math.Max(2, (Height - FontSize) / 2);
-            DrawLabel(Text, X + 14, textY, FontSize, 245, 245, 245);
+            int textY = ResolvedY + Math.Max(2, (Height - FontSize) / 2);
+            DrawLabel(Text, ResolvedX + 14, textY, FontSize, 245, 245, 245);
         }
 
         public bool IsHovered { get => isHovered; set => isHovered = value; }

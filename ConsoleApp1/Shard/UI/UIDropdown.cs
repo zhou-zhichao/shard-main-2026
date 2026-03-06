@@ -50,7 +50,7 @@ namespace Shard
                 b = 100;
             }
 
-            DrawRect(X, Y, Width, rowHeight, r, g, b, 255);
+            DrawRect(ResolvedX, ResolvedY, Width, rowHeight, r, g, b, 255);
 
             string label;
             if (string.IsNullOrWhiteSpace(Text))
@@ -62,15 +62,15 @@ namespace Shard
                 label = Text + ": " + SelectedOption;
             }
 
-            DrawLabel(label, X + 12, Y + Math.Max(2, (rowHeight - FontSize) / 2), FontSize, 245, 245, 245);
-            DrawLabel(Expanded ? "^" : "v", X + Width - 22, Y + Math.Max(2, (rowHeight - FontSize) / 2), FontSize, 245, 245, 245);
+            DrawLabel(label, ResolvedX + 12, ResolvedY + Math.Max(2, (rowHeight - FontSize) / 2), FontSize, 245, 245, 245);
+            DrawLabel(Expanded ? "^" : "v", ResolvedX + Width - 22, ResolvedY + Math.Max(2, (rowHeight - FontSize) / 2), FontSize, 245, 245, 245);
 
             if (Expanded == false)
             {
                 return;
             }
 
-            int startY = Y + rowHeight;
+            int startY = ResolvedY + rowHeight;
 
             for (int i = 0; i < options.Count; i++)
             {
@@ -93,8 +93,8 @@ namespace Shard
                     rowB = 90;
                 }
 
-                DrawRect(X, rowY, Width, rowHeight, rowR, rowG, rowB, 255);
-                DrawLabel(options[i], X + 12, rowY + Math.Max(2, (rowHeight - FontSize) / 2), FontSize, 245, 245, 245);
+                DrawRect(ResolvedX, rowY, Width, rowHeight, rowR, rowG, rowB, 255);
+                DrawLabel(options[i], ResolvedX + 12, rowY + Math.Max(2, (rowHeight - FontSize) / 2), FontSize, 245, 245, 245);
             }
         }
 
@@ -124,9 +124,9 @@ namespace Shard
             }
 
             int rowHeight = Math.Max(Height, 24);
-            int startY = Y + rowHeight;
+            int startY = ResolvedY + rowHeight;
 
-            if (px < X || px > X + Width || py < startY)
+            if (px < ResolvedX || px > ResolvedX + Width || py < startY)
             {
                 return false;
             }

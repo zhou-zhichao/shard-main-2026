@@ -78,10 +78,18 @@ namespace Shard
 
             ret = loadTexture(trans.SpritePath);
 
-            float w, h;
-            SDL_GetTextureSize(ret, &w, &h);
-            trans.Ht = (int)h;
-            trans.Wid = (int)w;
+            if (trans.HasSpriteSourceRect)
+            {
+                trans.Wid = trans.SpriteSourceWidth;
+                trans.Ht = trans.SpriteSourceHeight;
+            }
+            else
+            {
+                float w, h;
+                SDL_GetTextureSize(ret, &w, &h);
+                trans.Ht = (int)h;
+                trans.Wid = (int)w;
+            }
             trans.recalculateCentre();
 
             return ret;
@@ -227,17 +235,27 @@ namespace Shard
 
                 var sprite = loadTexture(trans);
 
-                sRect.x = 0;
-                sRect.y = 0;
-                sRect.w = (float)(trans.Wid * trans.Scalex);
-                sRect.h = (float)(trans.Ht * trans.Scaley);
+                if (trans.HasSpriteSourceRect)
+                {
+                    sRect.x = trans.SpriteSourceX;
+                    sRect.y = trans.SpriteSourceY;
+                    sRect.w = trans.SpriteSourceWidth;
+                    sRect.h = trans.SpriteSourceHeight;
+                }
+                else
+                {
+                    sRect.x = 0;
+                    sRect.y = 0;
+                    sRect.w = trans.Wid;
+                    sRect.h = trans.Ht;
+                }
 
                 tRect.x = (float)trans.X;
                 tRect.y = (float)trans.Y;
-                tRect.w = sRect.w;
-                tRect.h = sRect.h;
+                tRect.w = (float)(trans.Wid * trans.Scalex);
+                tRect.h = (float)(trans.Ht * trans.Scaley);
 
-                SDL_FPoint center = new SDL_FPoint { x = sRect.w / 2, y = sRect.h / 2 };
+                SDL_FPoint center = new SDL_FPoint { x = tRect.w / 2, y = tRect.h / 2 };
                 SDL_RenderTextureRotated(_rend, sprite, &sRect, &tRect, trans.Rotz, &center, SDL_FlipMode.SDL_FLIP_NONE);
             }
 

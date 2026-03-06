@@ -10,11 +10,19 @@ namespace Shard
 {
     abstract public class Sound
     {
-        // similar with Unity AudioSource.volume(from 0.0 to 1.0)
-        public float Volume { get; set; } = 1.0f;
+        public virtual float Volume
+        {
+            get => EffectsVolume;
+            set => EffectsVolume = value;
+        }
+
+        public abstract float MusicVolume { get; set; }
+        public abstract float EffectsVolume { get; set; }
 
         // add loop to support BGM
         abstract public void playSound(string file, bool loop = false);
+        abstract public void PlayMusic(string file, bool loop = true);
+        abstract public void StopMusic();
 
         // add per frame update method to clean up resources that have finished playback
         abstract public void update();

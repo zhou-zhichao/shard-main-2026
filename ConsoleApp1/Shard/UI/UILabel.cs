@@ -16,7 +16,7 @@ namespace Shard
                 return;
             }
 
-            DrawLabel(Text, X, Y, FontSize, 240, 240, 240);
+            DrawLabel(Text, ResolvedX, ResolvedY, FontSize, 240, 240, 240);
         }
 
         public override bool HitTest(int px, int py)

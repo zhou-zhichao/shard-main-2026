@@ -39,5 +39,10 @@ namespace Shard
             return Int32.MaxValue; 
         }
 
+        public virtual bool useGlobalLauncherEscapeShortcut()
+        {
+            return true;
+        }
+
     }
 }

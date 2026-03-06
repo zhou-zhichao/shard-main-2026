@@ -27,6 +27,8 @@ namespace Shard
         private int wid, ht;
         private float scalex, scaley;
         private string spritePath;
+        private bool hasSpriteSourceRect;
+        private int spriteSourceX, spriteSourceY, spriteSourceWidth, spriteSourceHeight;
         private Vector2 forward;
         private Vector2 right, centre;
 
@@ -140,6 +142,11 @@ namespace Shard
             get => spritePath;
             set => spritePath = value;
         }
+        public bool HasSpriteSourceRect { get => hasSpriteSourceRect; }
+        public int SpriteSourceX { get => spriteSourceX; }
+        public int SpriteSourceY { get => spriteSourceY; }
+        public int SpriteSourceWidth { get => spriteSourceWidth; }
+        public int SpriteSourceHeight { get => spriteSourceHeight; }
         public ref Vector2 Forward { get => ref forward; }
         public int Wid { get => wid; set => wid = value; }
         public int Ht { get => ht; set => ht = value; }
@@ -150,5 +157,23 @@ namespace Shard
         public float Scaley { get => scaley; set => scaley = value; }
         public float Lx { get => lx; set => lx = value; }
         public float Ly { get => ly; set => ly = value; }
+
+        public void SetSpriteSourceRect(int x, int y, int width, int height)
+        {
+            hasSpriteSourceRect = true;
+            spriteSourceX = x;
+            spriteSourceY = y;
+            spriteSourceWidth = width;
+            spriteSourceHeight = height;
+        }
+
+        public void ClearSpriteSourceRect()
+        {
+            hasSpriteSourceRect = false;
+            spriteSourceX = 0;
+            spriteSourceY = 0;
+            spriteSourceWidth = 0;
+            spriteSourceHeight = 0;
+        }
     }
 }

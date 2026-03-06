@@ -19,6 +19,10 @@ namespace Shard
         protected float _scaleX = 1.0f;
         protected float _scaleY = 1.0f;
         protected bool _isFullscreen = false;
+        protected int _clearR = 0;
+        protected int _clearG = 0;
+        protected int _clearB = 0;
+        protected int _clearA = 255;
 
         public virtual void drawLine(int x, int y, int x2, int y2, int r, int g, int b, int a)
         {
@@ -53,6 +57,27 @@ namespace Shard
             }
         }
 
+        public virtual void drawFilledRect(int x, int y, int width, int height, int r, int g, int b, int a)
+        {
+            for (int row = 0; row < height; row++)
+            {
+                drawLine(x, y + row, x + width, y + row, r, g, b, a);
+            }
+        }
+
+        public virtual void setClearColor(int r, int g, int b, int a = 255)
+        {
+            _clearR = Math.Clamp(r, 0, 255);
+            _clearG = Math.Clamp(g, 0, 255);
+            _clearB = Math.Clamp(b, 0, 255);
+            _clearA = Math.Clamp(a, 0, 255);
+        }
+
+        public void setClearColor(Color col)
+        {
+            setClearColor(col.R, col.G, col.B, col.A);
+        }
+
         public void showText(string text, double x, double y, int size, Color col)
         {
             showText(text, x, y, size, col.R, col.G, col.B);
@@ -68,10 +93,28 @@ namespace Shard
         {
         }
 
+        public virtual void setFullscreen(bool fullscreen)
+        {
+            if (fullscreen)
+            {
+                setFullscreen();
+            }
+            else if (_isFullscreen)
+            {
+                toggleFullscreen();
+            }
+        }
+
         public virtual void handleResize(int newW, int newH)
         {
             _width = newW;
             _height = newH;
+            updateViewport();
+        }
+
+        public virtual void setWindowSize(int w, int h)
+        {
+            setSize(w, h);
             updateViewport();
         }
 

@@ -27,6 +27,8 @@ namespace Shard
         public string Text { get; set; }
         public int FontSize { get; set; }
         public string Action { get; set; }
+        public string AnchorX { get; set; }
+        public string AnchorY { get; set; }
         public List<string> Options { get; set; } = new List<string>();
         public int DefaultIndex { get; set; }
         public bool? Visible { get; set; }
@@ -131,6 +133,8 @@ namespace Shard
             element.Width = def.Width;
             element.Height = def.Height;
             element.Text = def.Text ?? "";
+            element.AnchorX = def.AnchorX;
+            element.AnchorY = def.AnchorY;
 
             if (def.FontSize > 0)
             {

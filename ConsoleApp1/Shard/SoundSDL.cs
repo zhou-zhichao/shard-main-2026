@@ -1,165 +1,170 @@
 /*
 *
-*   A refined sound system implementation using SDL3. Now supports looping, volume control and audio streaming.
-*   @author Yuxi Guo
-*   @version 1.1
+*   SDL_mixer-backed sound system that separates music and sound effects.
+*   Supports MP3/WAV playback, track cleanup, and independent music/effects volume.
 *
 */
 
 using SDL;
 using static SDL.SDL3;
+using static SDL.SDL3_mixer;
 using System;
 using System.Collections.Generic;
 
 namespace Shard
 {
-    // a simple structure to hold preloaded audio data
-    public unsafe struct PreloadedAudio
+    unsafe class ActiveTrack
     {
-        public byte* Buffer;
-        public SDL_AudioSpec Spec;
-        public uint Length;
-    }
-
-    // a simple structure to manage the audio stream
-    public unsafe struct ActiveStream
-    {
-        public SDL_AudioStream* Stream;
-        public byte* Buffer; // document buffer for release
-        public uint Length; // length of the buffer
-        public bool IsLooping;
-        public string FilePath;
+        public MIX_Track* Track { get; set; }
+        public string FilePath { get; set; }
+        public bool IsMusic { get; set; }
+        public bool Loop { get; set; }
     }
 
     public unsafe class SoundSDL : Sound
     {
-        private static SDL_AudioDeviceID _dev = 0;
-        private readonly List<ActiveStream> _streams = new List<ActiveStream>();
-        private readonly object _streamLock = new object();
-        
-        // preloaded audio cache: file path -> audio data
-        private readonly Dictionary<string, PreloadedAudio> _preloadedSounds = new Dictionary<string, PreloadedAudio>();
-        private readonly object _preloadLock = new object();
+        private static SDL_AudioDeviceID device = 0;
+
+        private MIX_Mixer* mixer;
+        private Dictionary<string, nint> cachedAudio;
+        private HashSet<string> preloadedAudio;
+        private List<ActiveTrack> activeEffects;
+        private ActiveTrack currentMusic;
+        private float musicVolume;
+        private float effectsVolume;
 
         public SoundSDL()
         {
+            cachedAudio = new Dictionary<string, nint>(StringComparer.OrdinalIgnoreCase);
+            preloadedAudio = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            activeEffects = new List<ActiveTrack>();
+            currentMusic = null;
+            musicVolume = 1.0f;
+            effectsVolume = 1.0f;
+
             SDL_Init(SDL_InitFlags.SDL_INIT_AUDIO);
-            
-            // The default playback device is enabled only once during the initialization
-            if (_dev == 0)
+            MIX_Init();
+            ensureMixer();
+        }
+
+        public override float MusicVolume
+        {
+            get => musicVolume;
+            set
             {
-                _dev = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, null);
-                if (_dev == 0)
-                {
-                    _dev = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, null);
-                    if (_dev != 0)
-                    {
-                        SDL_ResumeAudioDevice(_dev);
-                        Debug.getInstance().log("Audio device opened successfully");
-                    } 
-                    else
-                    {
-                        Console.WriteLine("Failed to open audio device:"+ SDL_GetError());
-                    }
-                }
+                musicVolume = clampVolume(value);
+                applyTrackVolumes();
+            }
+        }
+
+        public override float EffectsVolume
+        {
+            get => effectsVolume;
+            set
+            {
+                effectsVolume = clampVolume(value);
+                applyTrackVolumes();
             }
         }
 
         public override void playSound(string file, bool loop = false)
         {
-            if (_dev == 0)
+            if (ensureMixer() == false)
             {
-                Console.WriteLine("Audio device is not available, cannot play sound.");
                 return;
             }
 
-            SDL_AudioSpec spec;
-            byte* buffer = null;
-            uint length = 0;
-
-            file = Bootstrap.getAssetManager().getAssetPath(file);
-            Console.WriteLine("Try to play sound: " + file);
-
-            // Check if the sound is preloaded, use cached version if available
-            bool usePreloaded = false;
-            lock (_preloadLock)
+            string path = resolveFile(file);
+            if (path == null)
             {
-                if (_preloadedSounds.TryGetValue(file, out var preloaded))
-                {
-                    // Copy the preloaded data for playback (we can't reuse the same buffer directly
-                    // because each stream needs its own buffer to manage)
-                    buffer = (byte*)SDL_malloc(preloaded.Length);
-                    if (buffer != null)
-                    {
-                        System.Buffer.MemoryCopy(preloaded.Buffer, buffer, preloaded.Length, preloaded.Length);
-                        spec = preloaded.Spec;
-                        length = preloaded.Length;
-                        usePreloaded = true;
-                    }
-                }
-            }
-
-            if (!usePreloaded)
-            {
-                // Load from file if not preloaded
-                if (!SDL_LoadWAV(file, &spec, &buffer, &length))
-                {
-                    Console.WriteLine("Failed to load WAV: " + SDL_GetError());
-                    return;
-                }
-            }
-
-            SDL_AudioStream* stream = SDL_CreateAudioStream(&spec, &spec);
-            if (stream == null) {
-                SDL_free(buffer);
                 return;
             }
-            
-            // Initialize the audio stream with the volume
-            SDL_SetAudioStreamGain(stream, this.Volume);
-            SDL_BindAudioStream(_dev, stream);
-            
-            // First-time data population
-            SDL_PutAudioStreamData(stream, (nint)buffer, (int)length);
 
-            lock (_streamLock)
+            MIX_Audio* audio = loadAudio(path);
+            if (audio == null)
             {
-                _streams.Add(new ActiveStream
-                {
-                    Stream = stream,
-                    Buffer = buffer,
-                    Length = length, // Store length for looping
-                    IsLooping = loop,
-                    FilePath = file
-                });
+                return;
             }
+
+            MIX_Track* track = MIX_CreateTrack(mixer);
+            if (track == null)
+            {
+                Debug.getInstance().log("Sound warning: failed to create effect track. " + SDL_GetError(), Debug.DEBUG_LEVEL_WARNING);
+                return;
+            }
+
+            MIX_SetTrackAudio(track, audio);
+            MIX_SetTrackLoops(track, loop ? -1 : 0);
+            MIX_SetTrackGain(track, EffectsVolume);
+
+            if (!MIX_PlayTrack(track, 0))
+            {
+                Debug.getInstance().log("Sound warning: failed to play effect track. " + SDL_GetError(), Debug.DEBUG_LEVEL_WARNING);
+                MIX_DestroyTrack(track);
+                return;
+            }
+
+            activeEffects.Add(new ActiveTrack
+            {
+                Track = track,
+                FilePath = path,
+                IsMusic = false,
+                Loop = loop
+            });
+        }
+
+        public override void PlayMusic(string file, bool loop = true)
+        {
+            if (ensureMixer() == false)
+            {
+                return;
+            }
+
+            string path = resolveFile(file);
+            if (path == null)
+            {
+                return;
+            }
+
+            MIX_Audio* audio = loadAudio(path);
+            if (audio == null)
+            {
+                return;
+            }
+
+            StopMusic();
+            currentMusic = startTrack(path, audio, true, loop, MusicVolume);
+        }
+
+        public override void StopMusic()
+        {
+            if (currentMusic == null || currentMusic.Track == null)
+            {
+                return;
+            }
+
+            MIX_StopTrack(currentMusic.Track, 0);
+            MIX_DestroyTrack(currentMusic.Track);
+            currentMusic = null;
         }
 
         public override void update()
         {
-            lock (_streamLock)
-            {
-                for (int i = _streams.Count - 1; i >= 0; i--)
-                {
-                    var active = _streams[i];
+            cleanupCompletedEffects();
 
-                    // Set the volume of the audio stream
-                    SDL_SetAudioStreamGain(active.Stream, this.Volume);
-                    // Check the number of pending bytes in the playback queue
-                    if (SDL_GetAudioStreamQueued(active.Stream) == 0)
+            if (currentMusic != null && currentMusic.Track != null && !MIX_TrackPlaying(currentMusic.Track))
+            {
+                string path = currentMusic.FilePath;
+                bool shouldLoop = currentMusic.Loop;
+                MIX_DestroyTrack(currentMusic.Track);
+                currentMusic = null;
+
+                if (shouldLoop)
+                {
+                    MIX_Audio* audio = loadAudio(path);
+                    if (audio != null)
                     {
-                        if (active.IsLooping)
-                        {
-                            // If looping is required, re-feed the buffered backup
-                            SDL_PutAudioStreamData(active.Stream, (nint)active.Buffer, (int)active.Length);
-                        }
-                        else
-                        {
-                            // clean up
-                            SDL_DestroyAudioStream(active.Stream);
-                            SDL_free(active.Buffer);
-                            _streams.RemoveAt(i);
-                        }
+                        currentMusic = startTrack(path, audio, true, true, MusicVolume);
                     }
                 }
             }
@@ -167,105 +172,242 @@ namespace Shard
 
         public override void stopAllSounds()
         {
-            lock (_streamLock)
+            for (int i = activeEffects.Count - 1; i >= 0; i--)
             {
-                for (int i = 0; i < _streams.Count; i++)
-                {
-                    var active = _streams[i];
-                    SDL_DestroyAudioStream(active.Stream);
-                    SDL_free(active.Buffer);
-                }
-                _streams.Clear();
+                stopAndDestroyTrack(activeEffects[i].Track);
             }
+
+            activeEffects.Clear();
+            StopMusic();
         }
 
         public override void stopSound(string file)
         {
-            file = Bootstrap.getAssetManager().getAssetPath(file);
-
-            lock (_streamLock)
+            string path = resolveFile(file);
+            if (path == null)
             {
-                for (int i = _streams.Count - 1; i >= 0; i--)
+                return;
+            }
+
+            for (int i = activeEffects.Count - 1; i >= 0; i--)
+            {
+                if (string.Equals(activeEffects[i].FilePath, path, StringComparison.OrdinalIgnoreCase))
                 {
-                    var active = _streams[i];
-                    if (string.Equals(active.FilePath, file, StringComparison.OrdinalIgnoreCase))
-                    {
-                        SDL_DestroyAudioStream(active.Stream);
-                        SDL_free(active.Buffer);
-                        _streams.RemoveAt(i);
-                    }
+                    stopAndDestroyTrack(activeEffects[i].Track);
+                    activeEffects.RemoveAt(i);
                 }
+            }
+
+            if (currentMusic != null &&
+                string.Equals(currentMusic.FilePath, path, StringComparison.OrdinalIgnoreCase))
+            {
+                StopMusic();
             }
         }
 
         public override void preloadSound(string file)
         {
-            if (_dev == 0)
+            if (ensureMixer() == false)
             {
-                Console.WriteLine("Audio device is not available, cannot preload sound.");
                 return;
             }
 
-            file = Bootstrap.getAssetManager().getAssetPath(file);
-
-            lock (_preloadLock)
+            string path = resolveFile(file);
+            if (path == null)
             {
-                if (_preloadedSounds.ContainsKey(file))
-                {
-                    Console.WriteLine("Sound already preloaded: " + file);
-                    return;
-                }
-            }
-
-            SDL_AudioSpec spec;
-            byte* buffer;
-            uint length;
-
-            if (!SDL_LoadWAV(file, &spec, &buffer, &length))
-            {
-                Console.WriteLine("Failed to preload WAV: " + SDL_GetError());
                 return;
             }
 
-            lock (_preloadLock)
+            if (loadAudio(path) != null)
             {
-                _preloadedSounds[file] = new PreloadedAudio
-                {
-                    Buffer = buffer,
-                    Spec = spec,
-                    Length = length
-                };
+                preloadedAudio.Add(path);
             }
-            Console.WriteLine("Preloaded sound: " + file);
         }
 
         public override void unloadSound(string file)
         {
-            file = Bootstrap.getAssetManager().getAssetPath(file);
-
-            lock (_preloadLock)
+            string path = resolveFile(file);
+            if (path == null)
             {
-                if (_preloadedSounds.TryGetValue(file, out var preloaded))
-                {
-                    SDL_free(preloaded.Buffer);
-                    _preloadedSounds.Remove(file);
-                    Console.WriteLine("Unloaded sound: " + file);
-                }
+                return;
             }
+
+            stopSound(file);
+            destroyCachedAudio(path);
+            preloadedAudio.Remove(path);
         }
 
         public override void clearPreloadedSounds()
         {
-            lock (_preloadLock)
+            List<string> toRemove = new List<string>(preloadedAudio);
+            foreach (string path in toRemove)
             {
-                foreach (var kvp in _preloadedSounds)
+                stopSound(path);
+                destroyCachedAudio(path);
+            }
+
+            preloadedAudio.Clear();
+        }
+
+        private bool ensureMixer()
+        {
+            if (device == 0)
+            {
+                device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, null);
+                if (device == 0)
                 {
-                    SDL_free(kvp.Value.Buffer);
+                    Debug.getInstance().log("Sound warning: failed to open audio device. " + SDL_GetError(), Debug.DEBUG_LEVEL_WARNING);
+                    return false;
                 }
-                _preloadedSounds.Clear();
-                Console.WriteLine("Cleared all preloaded sounds");
+
+                SDL_ResumeAudioDevice(device);
+            }
+
+            if (mixer != null)
+            {
+                return true;
+            }
+
+            SDL_AudioSpec spec = new SDL_AudioSpec();
+            if (!SDL_GetAudioDeviceFormat(device, &spec, null))
+            {
+                Debug.getInstance().log("Sound warning: failed to query audio device format. " + SDL_GetError(), Debug.DEBUG_LEVEL_WARNING);
+                return false;
+            }
+
+            mixer = MIX_CreateMixerDevice(device, &spec);
+            if (mixer == null)
+            {
+                Debug.getInstance().log("Sound warning: failed to create mixer. " + SDL_GetError(), Debug.DEBUG_LEVEL_WARNING);
+                return false;
+            }
+
+            return true;
+        }
+
+        private MIX_Audio* loadAudio(string path)
+        {
+            if (cachedAudio.TryGetValue(path, out nint cached))
+            {
+                return (MIX_Audio*)cached;
+            }
+
+            MIX_Audio* audio = MIX_LoadAudio(mixer, path, true);
+            if (audio == null)
+            {
+                Debug.getInstance().log("Sound warning: failed to load audio " + path + ". " + SDL_GetError(), Debug.DEBUG_LEVEL_WARNING);
+                return null;
+            }
+
+            cachedAudio[path] = (nint)audio;
+            return audio;
+        }
+
+        private void applyTrackVolumes()
+        {
+            if (currentMusic != null && currentMusic.Track != null)
+            {
+                MIX_SetTrackGain(currentMusic.Track, MusicVolume);
+            }
+
+            foreach (ActiveTrack effect in activeEffects)
+            {
+                if (effect.Track != null)
+                {
+                    MIX_SetTrackGain(effect.Track, EffectsVolume);
+                }
             }
         }
 
+        private void cleanupCompletedEffects()
+        {
+            for (int i = activeEffects.Count - 1; i >= 0; i--)
+            {
+                ActiveTrack track = activeEffects[i];
+                if (track.Track == null)
+                {
+                    activeEffects.RemoveAt(i);
+                    continue;
+                }
+
+                if (!MIX_TrackPlaying(track.Track))
+                {
+                    MIX_DestroyTrack(track.Track);
+                    activeEffects.RemoveAt(i);
+                }
+            }
+        }
+
+        private void stopAndDestroyTrack(MIX_Track* track)
+        {
+            if (track == null)
+            {
+                return;
+            }
+
+            MIX_StopTrack(track, 0);
+            MIX_DestroyTrack(track);
+        }
+
+        private ActiveTrack startTrack(string path, MIX_Audio* audio, bool isMusic, bool loop, float gain)
+        {
+            MIX_Track* track = MIX_CreateTrack(mixer);
+            if (track == null)
+            {
+                Debug.getInstance().log("Sound warning: failed to create " + (isMusic ? "music" : "effect") + " track. " + SDL_GetError(), Debug.DEBUG_LEVEL_WARNING);
+                return null;
+            }
+
+            MIX_SetTrackAudio(track, audio);
+            MIX_SetTrackLoops(track, loop ? -1 : 0);
+            MIX_SetTrackGain(track, gain);
+
+            if (!MIX_PlayTrack(track, 0))
+            {
+                Debug.getInstance().log("Sound warning: failed to play " + (isMusic ? "music" : "effect") + " track. " + SDL_GetError(), Debug.DEBUG_LEVEL_WARNING);
+                MIX_DestroyTrack(track);
+                return null;
+            }
+
+            return new ActiveTrack
+            {
+                Track = track,
+                FilePath = path,
+                IsMusic = isMusic,
+                Loop = loop
+            };
+        }
+
+        private void destroyCachedAudio(string path)
+        {
+            if (cachedAudio.TryGetValue(path, out nint audioPtr) == false)
+            {
+                return;
+            }
+
+            MIX_DestroyAudio((MIX_Audio*)audioPtr);
+            cachedAudio.Remove(path);
+        }
+
+        private string resolveFile(string file)
+        {
+            if (string.IsNullOrWhiteSpace(file))
+            {
+                return null;
+            }
+
+            string path = Bootstrap.getAssetManager().getAssetPath(file);
+            if (path != null)
+            {
+                return path;
+            }
+
+            return file;
+        }
+
+        private float clampVolume(float value)
+        {
+            return Math.Clamp(value, 0.0f, 1.0f);
+        }
     }
 }

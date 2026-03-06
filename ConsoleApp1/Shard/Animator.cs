@@ -61,8 +61,16 @@ namespace Shard
             AnimationClip clip;
             if (clips.TryGetValue(clipId, out clip) == false)
             {
-                Debug.getInstance().log("Animator warning: clip not found: " + clipId, Debug.DEBUG_LEVEL_WARNING);
-                return;
+                if (AnimationCatalog.getInstance().TryGetClip(clipId, out clip))
+                {
+                    clips[clipId] = clip.copy();
+                    clip = clips[clipId];
+                }
+                else
+                {
+                    Debug.getInstance().log("Animator warning: clip not found: " + clipId, Debug.DEBUG_LEVEL_WARNING);
+                    return;
+                }
             }
 
             if (restart == false && playing && currentClipId == clipId)
@@ -126,6 +134,11 @@ namespace Shard
                 return false;
             }
 
+            if (clip.UsesAtlas)
+            {
+                return validateAtlasClip(clip);
+            }
+
             if (clip.Frames == null || clip.Frames.Count == 0)
             {
                 Debug.getInstance().log("Animator warning: clip " + clip.Id + " has no frames.", Debug.DEBUG_LEVEL_WARNING);
@@ -150,6 +163,29 @@ namespace Shard
             return true;
         }
 
+        private bool validateAtlasClip(AnimationClip clip)
+        {
+            if (Bootstrap.getAssetManager().getAssetPath(clip.Texture) == null)
+            {
+                Debug.getInstance().log("Animator warning: clip " + clip.Id + " references missing texture " + clip.Texture + ".", Debug.DEBUG_LEVEL_WARNING);
+                return false;
+            }
+
+            if (clip.FrameWidth <= 0 || clip.FrameHeight <= 0)
+            {
+                Debug.getInstance().log("Animator warning: clip " + clip.Id + " has invalid atlas frame size.", Debug.DEBUG_LEVEL_WARNING);
+                return false;
+            }
+
+            if (clip.AtlasFrames == null || clip.AtlasFrames.Count == 0)
+            {
+                Debug.getInstance().log("Animator warning: clip " + clip.Id + " has no atlas frames.", Debug.DEBUG_LEVEL_WARNING);
+                return false;
+            }
+
+            return true;
+        }
+
         private void advanceFrame()
         {
             if (currentClip == null)
@@ -157,7 +193,13 @@ namespace Shard
                 return;
             }
 
-            if (currentFrame < currentClip.Frames.Count - 1)
+            int frameCount = currentClip.UsesAtlas ? currentClip.AtlasFrames.Count : currentClip.Frames.Count;
+            if (frameCount <= 0)
+            {
+                return;
+            }
+
+            if (currentFrame < frameCount - 1)
             {
                 currentFrame += 1;
                 applyFrame();
@@ -176,7 +218,18 @@ namespace Shard
 
         private void applyFrame()
         {
-            if (currentClip == null || currentFrame < 0 || currentFrame >= currentClip.Frames.Count)
+            if (currentClip == null)
+            {
+                return;
+            }
+
+            if (currentClip.UsesAtlas)
+            {
+                applyAtlasFrame();
+                return;
+            }
+
+            if (currentFrame < 0 || currentFrame >= currentClip.Frames.Count)
             {
                 return;
             }
@@ -195,7 +248,37 @@ namespace Shard
                 return;
             }
 
+            owner.Transform.ClearSpriteSourceRect();
             owner.Transform.SpritePath = path;
+        }
+
+        private void applyAtlasFrame()
+        {
+            if (currentFrame < 0 || currentFrame >= currentClip.AtlasFrames.Count)
+            {
+                return;
+            }
+
+            string path = Bootstrap.getAssetManager().getAssetPath(currentClip.Texture);
+            if (path == null)
+            {
+                if (warnedMissingFrames.Contains(currentClip.Texture) == false)
+                {
+                    Debug.getInstance().log("Animator warning: missing atlas texture during playback: " + currentClip.Texture, Debug.DEBUG_LEVEL_WARNING);
+                    warnedMissingFrames.Add(currentClip.Texture);
+                }
+
+                return;
+            }
+
+            AnimationFrame frame = currentClip.AtlasFrames[currentFrame];
+            owner.Transform.SpritePath = path;
+            owner.Transform.SetSpriteSourceRect(
+                frame.Column * currentClip.FrameWidth,
+                frame.Row * currentClip.FrameHeight,
+                currentClip.FrameWidth,
+                currentClip.FrameHeight
+            );
         }
     }
 }

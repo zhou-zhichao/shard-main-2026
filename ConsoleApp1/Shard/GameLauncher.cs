@@ -1,30 +1,16 @@
 /*
-*   GameLauncher - A visual game launcher with main menu, settings, and game selection.
-*       Uses the UISystem (same pattern as Missile Command) for a polished menu experience.
-*       Press ESC during a game to return to this launcher.
+*   GameLauncher - Demo-focused launcher for the platform showcase.
 */
 
 using System;
-using System.Drawing;
-using ScoreDemo;
+using GameTest;
 
 namespace Shard
 {
     class GameLauncher : Game, InputListener
     {
-        private enum LauncherState
-        {
-            MainMenu,
-            Settings,
-            GameSelect
-        }
-
         private UISystem uiSystem;
-        private LauncherState state;
         private DemoEnemy menuEnemy;
-
-        // Remember user's FPS choice so it persists across game launches
-        private static int userFpsChoice = 60;
 
         public override void initialize()
         {
@@ -32,25 +18,15 @@ namespace Shard
 
             uiSystem = new UISystem();
             uiSystem.LoadFromAsset("ui_layouts_launcher.json");
+            DemoSettings.Bind(uiSystem);
 
-            // Main menu actions
-            uiSystem.BindButtonAction("show_games", ShowGameSelect);
+            uiSystem.BindButtonAction("start_demo", StartDemo);
             uiSystem.BindButtonAction("open_settings", OpenSettings);
             uiSystem.BindButtonAction("exit_game", ExitGame);
-            uiSystem.BindButtonAction("back_main", EnterMainMenu);
-            uiSystem.BindButtonAction("show_scores", ShowScoreSystem);
+            uiSystem.BindButtonAction("back_launcher_main", EnterMainMenu);
 
-            // Settings actions
-            uiSystem.BindDropdownAction("set_frame_limit", ApplyFrameLimit);
-
-            // Game launch actions
-            uiSystem.BindButtonAction("launch_GameTest", () => LaunchGame("GameTest"));
-            uiSystem.BindButtonAction("launch_GameMissileCommand", () => LaunchGame("GameMissileCommand"));
-            uiSystem.BindButtonAction("launch_GameSpaceInvaders", () => LaunchGame("GameSpaceInvaders"));
-            uiSystem.BindButtonAction("launch_GameBreakout", () => LaunchGame("GameBreakout"));
-            uiSystem.BindButtonAction("launch_GameManicMiner", () => LaunchGame("GameManicMiner"));
-
-            Bootstrap.setTargetFrameRate(userFpsChoice);
+            DemoSettings.ApplyCurrentRuntimeValues();
+            DemoSettings.SyncCurrentScreen(uiSystem);
             EnterMainMenu();
         }
 
@@ -62,7 +38,7 @@ namespace Shard
 
         public override int getTargetFrameRate()
         {
-            return userFpsChoice;
+            return DemoSettings.GetTargetFrameRate();
         }
 
         public override bool isRunning()
@@ -70,63 +46,23 @@ namespace Shard
             return true;
         }
 
-        // --- State transitions ---
-
         private void EnterMainMenu()
         {
-            state = LauncherState.MainMenu;
-            uiSystem.SetScreen("main_menu");
+            uiSystem.SetScreen("launcher_main");
             CreateMenuEnemy();
         }
 
         private void OpenSettings()
         {
             DestroyMenuEnemy();
-            state = LauncherState.Settings;
-            uiSystem.SetScreen("settings");
-        }
-
-        private void ShowGameSelect()
-        {
-            DestroyMenuEnemy();
-            state = LauncherState.GameSelect;
-            uiSystem.SetScreen("game_select");
-        }
-
-        private void ShowScoreSystem()
-        {
-            DestroyMenuEnemy();
-            Bootstrap.getInput().removeListener(this);
-            Bootstrap.getSceneManager().loadScene(new ScoreUI());
+            uiSystem.SetScreen("launcher_settings");
+            DemoSettings.SyncCurrentScreen(uiSystem);
         }
 
         private void ExitGame()
         {
             Environment.Exit(0);
         }
-
-        private void ApplyFrameLimit(string selectedOption)
-        {
-            if (string.IsNullOrWhiteSpace(selectedOption))
-            {
-                return;
-            }
-
-            if (selectedOption.Equals("Unlimited", StringComparison.OrdinalIgnoreCase))
-            {
-                userFpsChoice = 0;
-                Bootstrap.setTargetFrameRate(0);
-                return;
-            }
-
-            if (Int32.TryParse(selectedOption, out int fps))
-            {
-                userFpsChoice = fps;
-                Bootstrap.setTargetFrameRate(fps);
-            }
-        }
-
-        // --- Animated demo enemy on main menu ---
 
         private void CreateMenuEnemy()
         {
@@ -147,36 +83,24 @@ namespace Shard
             menuEnemy = null;
         }
 
-        // --- Game launching ---
-
-        private void LaunchGame(string className)
+        private void StartDemo()
         {
             DestroyMenuEnemy();
 
-            // Clean up launcher
             Bootstrap.getInput().removeListener(this);
+            Bootstrap.getSound().StopMusic();
+            Bootstrap.getSound().stopAllSounds();
             GameObjectManager.getInstance().clearAll();
             PhysicsManager.getInstance().clearAll();
             Bootstrap.getInput().clearListeners();
             Bootstrap.getDisplay().clearDisplay();
+            Bootstrap.getSceneManager().reset();
 
-            // Create and switch to the selected game
-            Type t = Type.GetType("Shard." + className);
-            if (t == null)
-            {
-                Debug.getInstance().log("Failed to find game class: " + className, Debug.DEBUG_LEVEL_ERROR);
-                Bootstrap.getInput().addListener(this);
-                return;
-            }
-
-            Game newGame = (Game)Activator.CreateInstance(t);
+            Game newGame = new GameTest();
             Bootstrap.setRunningGame(newGame);
-            // Use the user's FPS choice, not the game's default
-            Bootstrap.setTargetFrameRate(userFpsChoice);
+            Bootstrap.setTargetFrameRate(DemoSettings.GetTargetFrameRate());
             newGame.initialize();
         }
-
-        // --- Input ---
 
         public void handleInput(InputEvent inp, string eventType)
         {

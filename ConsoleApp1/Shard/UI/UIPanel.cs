@@ -15,11 +15,11 @@ namespace Shard
                 return;
             }
 
-            DrawRect(X, Y, Width, Height, 110, 170, 220, 255);
+            DrawRect(ResolvedX, ResolvedY, Width, Height, 110, 170, 220, 255);
 
             if (string.IsNullOrWhiteSpace(Text) == false)
             {
-                DrawLabel(Text, X + 16, Y + 16, FontSize, 230, 240, 255);
+                DrawLabel(Text, ResolvedX + 16, ResolvedY + 16, FontSize, 230, 240, 255);
             }
         }
     }

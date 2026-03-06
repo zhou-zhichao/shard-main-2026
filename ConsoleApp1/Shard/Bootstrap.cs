@@ -137,6 +137,8 @@ namespace Shard
         public static void returnToLauncher()
         {
             // Clean up current game state
+            soundEngine.StopMusic();
+            soundEngine.stopAllSounds();
             GameObjectManager.getInstance().clearAll();
             PhysicsManager.getInstance().clearAll();
             input.clearListeners();

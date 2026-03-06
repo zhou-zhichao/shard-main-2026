@@ -8,6 +8,7 @@ namespace Shard
         private Dictionary<string, UIScreen> screens;
         private Dictionary<string, Action> buttonActions;
         private Dictionary<string, Action<string>> dropdownActions;
+        private Dictionary<string, UIElement> activeElementsById;
         private UIScreen activeScreen;
         private UIButton capturedButton;
         private int mouseX;
@@ -18,6 +19,7 @@ namespace Shard
             screens = new Dictionary<string, UIScreen>();
             buttonActions = new Dictionary<string, Action>();
             dropdownActions = new Dictionary<string, Action<string>>();
+            activeElementsById = new Dictionary<string, UIElement>();
             activeScreen = null;
             capturedButton = null;
             mouseX = 0;
@@ -54,6 +56,7 @@ namespace Shard
                 break;
             }
 
+            cacheActiveElements();
             UpdateHoverState();
         }
 
@@ -73,6 +76,7 @@ namespace Shard
             activeScreen = screen;
             capturedButton = null;
             CloseAllDropdownsExcept(null);
+            cacheActiveElements();
             UpdateHoverState();
         }
 
@@ -163,6 +167,45 @@ namespace Shard
             }
 
             dropdownActions[actionId] = callback;
+        }
+
+        public UIElement FindElement(string elementId)
+        {
+            if (string.IsNullOrWhiteSpace(elementId))
+            {
+                return null;
+            }
+
+            if (activeElementsById.TryGetValue(elementId, out UIElement element))
+            {
+                return element;
+            }
+
+            return null;
+        }
+
+        public bool SetDropdownSelectedOption(string elementId, string option)
+        {
+            if (string.IsNullOrWhiteSpace(option))
+            {
+                return false;
+            }
+
+            if (FindElement(elementId) is not UIDropdown dropdown)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < dropdown.Options.Count; i++)
+            {
+                if (string.Equals(dropdown.Options[i], option, StringComparison.OrdinalIgnoreCase))
+                {
+                    dropdown.SetSelectedIndex(i);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void HandleMouseDown()
@@ -382,13 +425,13 @@ namespace Shard
                 return false;
             }
 
-            int overlayX = overlayDropdown.X;
-            int overlayY = overlayDropdown.Y;
+            int overlayX = overlayDropdown.ResolvedX;
+            int overlayY = overlayDropdown.ResolvedY;
             int overlayWidth = overlayDropdown.Width;
             int overlayHeight = overlayDropdown.GetExpandedRenderHeight();
 
             return RectanglesIntersect(
-                element.X, element.Y, elementWidth, elementHeight,
+                element.ResolvedX, element.ResolvedY, elementWidth, elementHeight,
                 overlayX, overlayY, overlayWidth, overlayHeight
             );
         }
@@ -396,6 +439,26 @@ namespace Shard
         private bool RectanglesIntersect(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh)
         {
             return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+        }
+
+        private void cacheActiveElements()
+        {
+            activeElementsById.Clear();
+
+            if (activeScreen == null)
+            {
+                return;
+            }
+
+            foreach (UIElement element in activeScreen.Elements)
+            {
+                if (element == null || string.IsNullOrWhiteSpace(element.Id))
+                {
+                    continue;
+                }
+
+                activeElementsById[element.Id] = element;
+            }
         }
     }
 }

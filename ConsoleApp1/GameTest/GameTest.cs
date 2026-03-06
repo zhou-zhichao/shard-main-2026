@@ -20,13 +20,23 @@ namespace Shard
 
         public override int getTargetFrameRate()
         {
-            return 100;
+            return global::GameTest.DemoSettings.GetTargetFrameRate();
         }
 
         public override void initialize()
         {
-            // Load the first scene
-            Bootstrap.getSceneManager().initialize(new MainMenuScene());
+            global::GameTest.DemoRunState.StartNewRun();
+            Bootstrap.getSceneManager().initialize(new global::GameTest.DemoLevelScene(global::GameTest.DemoLevelCatalog.GetLevel(1)));
+        }
+
+        public override bool isRunning()
+        {
+            return global::GameTest.DemoRunState.Paused == false;
+        }
+
+        public override bool useGlobalLauncherEscapeShortcut()
+        {
+            return false;
         }
     }
 }

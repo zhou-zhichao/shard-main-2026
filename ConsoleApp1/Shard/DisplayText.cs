@@ -88,7 +88,7 @@ namespace Shard
             }
 
             myTexts.Clear();
-            SDL_SetRenderDrawColor(_rend, 0, 0, 0, 255);
+            SDL_SetRenderDrawColor(_rend, (byte)_clearR, (byte)_clearG, (byte)_clearB, (byte)_clearA);
             SDL_RenderClear(_rend);
 
         }
@@ -160,9 +160,22 @@ namespace Shard
             syncWindowSize();
         }
 
+        public override void setFullscreen(bool fullscreen)
+        {
+            _isFullscreen = fullscreen;
+            SDL_SetWindowFullscreen(_window, _isFullscreen);
+            syncWindowSize();
+        }
+
         public override void handleResize(int newW, int newH)
         {
             base.handleResize(newW, newH);
+        }
+
+        public override void setWindowSize(int w, int h)
+        {
+            SDL_SetWindowSize(_window, w, h);
+            syncWindowSize();
         }
 
         private void syncWindowSize()

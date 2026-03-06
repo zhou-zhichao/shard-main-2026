@@ -2,29 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Shard
 {
     class AnimationCatalogFile
     {
-        [JsonPropertyName("clips")]
         public List<AnimationCatalogClip> Clips { get; set; }
     }
 
     class AnimationCatalogClip
     {
-        [JsonPropertyName("id")]
         public string Id { get; set; }
-
-        [JsonPropertyName("fps")]
         public float Fps { get; set; }
-
-        [JsonPropertyName("mode")]
         public string Mode { get; set; }
-
-        [JsonPropertyName("frames")]
-        public List<string> Frames { get; set; }
+        public string Texture { get; set; }
+        public int FrameWidth { get; set; }
+        public int FrameHeight { get; set; }
+        public JsonElement Frames { get; set; }
     }
 
     class AnimationCatalog
@@ -131,12 +125,6 @@ namespace Shard
                 return false;
             }
 
-            if (cfg.Frames == null || cfg.Frames.Count == 0)
-            {
-                Debug.getInstance().log("AnimationCatalog warning: clip " + cfg.Id + " has no frames, clip skipped.", Debug.DEBUG_LEVEL_WARNING);
-                return false;
-            }
-
             AnimationPlayMode mode;
             if (Enum.TryParse(cfg.Mode, true, out mode) == false)
             {
@@ -144,22 +132,83 @@ namespace Shard
                 return false;
             }
 
-            foreach (string frame in cfg.Frames)
+            if (string.IsNullOrWhiteSpace(cfg.Texture))
             {
-                if (string.IsNullOrWhiteSpace(frame))
+                if (cfg.Frames.ValueKind != JsonValueKind.Array || cfg.Frames.GetArrayLength() == 0)
                 {
-                    Debug.getInstance().log("AnimationCatalog warning: clip " + cfg.Id + " has blank frame entry, clip skipped.", Debug.DEBUG_LEVEL_WARNING);
+                    Debug.getInstance().log("AnimationCatalog warning: clip " + cfg.Id + " has no frames, clip skipped.", Debug.DEBUG_LEVEL_WARNING);
                     return false;
                 }
 
-                if (Bootstrap.getAssetManager().getAssetPath(frame) == null)
+                List<string> frames = new List<string>();
+                foreach (JsonElement element in cfg.Frames.EnumerateArray())
                 {
-                    Debug.getInstance().log("AnimationCatalog warning: clip " + cfg.Id + " references missing frame " + frame + ", clip skipped.", Debug.DEBUG_LEVEL_WARNING);
-                    return false;
+                    if (element.ValueKind != JsonValueKind.String)
+                    {
+                        Debug.getInstance().log("AnimationCatalog warning: clip " + cfg.Id + " mixes legacy and atlas frame formats, clip skipped.", Debug.DEBUG_LEVEL_WARNING);
+                        return false;
+                    }
+
+                    string frame = element.GetString() ?? "";
+                    if (string.IsNullOrWhiteSpace(frame))
+                    {
+                        Debug.getInstance().log("AnimationCatalog warning: clip " + cfg.Id + " has blank frame entry, clip skipped.", Debug.DEBUG_LEVEL_WARNING);
+                        return false;
+                    }
+
+                    if (Bootstrap.getAssetManager().getAssetPath(frame) == null)
+                    {
+                        Debug.getInstance().log("AnimationCatalog warning: clip " + cfg.Id + " references missing frame " + frame + ", clip skipped.", Debug.DEBUG_LEVEL_WARNING);
+                        return false;
+                    }
+
+                    frames.Add(frame);
                 }
+
+                clip = new AnimationClip(cfg.Id, frames, cfg.Fps, mode);
+                return true;
             }
 
-            clip = new AnimationClip(cfg.Id, new List<string>(cfg.Frames), cfg.Fps, mode);
+            if (Bootstrap.getAssetManager().getAssetPath(cfg.Texture) == null)
+            {
+                Debug.getInstance().log("AnimationCatalog warning: clip " + cfg.Id + " references missing texture " + cfg.Texture + ", clip skipped.", Debug.DEBUG_LEVEL_WARNING);
+                return false;
+            }
+
+            if (cfg.FrameWidth <= 0 || cfg.FrameHeight <= 0)
+            {
+                Debug.getInstance().log("AnimationCatalog warning: clip " + cfg.Id + " has invalid atlas frame size, clip skipped.", Debug.DEBUG_LEVEL_WARNING);
+                return false;
+            }
+
+            if (cfg.Frames.ValueKind != JsonValueKind.Array || cfg.Frames.GetArrayLength() == 0)
+            {
+                Debug.getInstance().log("AnimationCatalog warning: clip " + cfg.Id + " has no atlas frames, clip skipped.", Debug.DEBUG_LEVEL_WARNING);
+                return false;
+            }
+
+            List<AnimationFrame> atlasFrames = new List<AnimationFrame>();
+            foreach (JsonElement element in cfg.Frames.EnumerateArray())
+            {
+                if (element.ValueKind != JsonValueKind.Object)
+                {
+                    Debug.getInstance().log("AnimationCatalog warning: clip " + cfg.Id + " atlas frames must be objects, clip skipped.", Debug.DEBUG_LEVEL_WARNING);
+                    return false;
+                }
+
+                if (element.TryGetProperty("col", out JsonElement colElement) == false ||
+                    element.TryGetProperty("row", out JsonElement rowElement) == false ||
+                    colElement.TryGetInt32(out int col) == false ||
+                    rowElement.TryGetInt32(out int row) == false)
+                {
+                    Debug.getInstance().log("AnimationCatalog warning: clip " + cfg.Id + " atlas frame is missing col/row, clip skipped.", Debug.DEBUG_LEVEL_WARNING);
+                    return false;
+                }
+
+                atlasFrames.Add(new AnimationFrame(col, row));
+            }
+
+            clip = new AnimationClip(cfg.Id, cfg.Texture, cfg.FrameWidth, cfg.FrameHeight, atlasFrames, cfg.Fps, mode);
             return true;
         }
     }
