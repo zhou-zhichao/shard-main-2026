@@ -1,6 +1,7 @@
 # Build results
 bin/
 obj/
+_build_verify/
 
 # IDE
 .vs/
@@ -11,3 +12,6 @@ obj/
 
 # Windows special files
 nul
+
+# Local runtime data
+scores.dat
