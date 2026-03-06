@@ -26,6 +26,7 @@ namespace Shard
         private float rotz;
         private int wid, ht;
         private float scalex, scaley;
+        private bool flipX, flipY;
         private string spritePath;
         private bool hasSpriteSourceRect;
         private int spriteSourceX, spriteSourceY, spriteSourceWidth, spriteSourceHeight;
@@ -50,6 +51,8 @@ namespace Shard
 
             scalex = 1.0f;
             scaley = 1.0f;
+            flipX = false;
+            flipY = false;
 
             x = 0;
             y = 0;
@@ -155,6 +158,8 @@ namespace Shard
         public ref Vector2 Centre { get => ref centre; }
         public float Scalex { get => scalex; set => scalex = value; }
         public float Scaley { get => scaley; set => scaley = value; }
+        public bool FlipX { get => flipX; set => flipX = value; }
+        public bool FlipY { get => flipY; set => flipY = value; }
         public float Lx { get => lx; set => lx = value; }
         public float Ly { get => ly; set => ly = value; }
 

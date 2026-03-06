@@ -256,7 +256,18 @@ namespace Shard
                 tRect.h = (float)(trans.Ht * trans.Scaley);
 
                 SDL_FPoint center = new SDL_FPoint { x = tRect.w / 2, y = tRect.h / 2 };
-                SDL_RenderTextureRotated(_rend, sprite, &sRect, &tRect, trans.Rotz, &center, SDL_FlipMode.SDL_FLIP_NONE);
+                SDL_FlipMode flipMode = SDL_FlipMode.SDL_FLIP_NONE;
+                if (trans.FlipX)
+                {
+                    flipMode |= SDL_FlipMode.SDL_FLIP_HORIZONTAL;
+                }
+
+                if (trans.FlipY)
+                {
+                    flipMode |= SDL_FlipMode.SDL_FLIP_VERTICAL;
+                }
+
+                SDL_RenderTextureRotated(_rend, sprite, &sRect, &tRect, trans.Rotz, &center, flipMode);
             }
 
             foreach (Circle c in _circlesToDraw)

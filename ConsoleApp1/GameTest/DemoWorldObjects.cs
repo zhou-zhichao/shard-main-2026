@@ -336,6 +336,7 @@ namespace GameTest
         private float boundsOffsetY;
         private float boundsWidth;
         private float boundsHeight;
+        private bool facingLeft;
         private bool configured;
 
         public RectangleF Bounds
@@ -364,6 +365,8 @@ namespace GameTest
             hurtAnimationTimer = 0;
             velocityX = 0;
             velocityY = 0;
+            facingLeft = false;
+            Transform.FlipX = false;
             Animator.Play("demo.knight.idle", true);
         }
 
@@ -418,6 +421,17 @@ namespace GameTest
             {
                 moveDirection += 1;
             }
+
+            if (moveDirection < 0)
+            {
+                facingLeft = true;
+            }
+            else if (moveDirection > 0)
+            {
+                facingLeft = false;
+            }
+
+            Transform.FlipX = facingLeft;
 
             velocityX = moveDirection * moveSpeed;
 
