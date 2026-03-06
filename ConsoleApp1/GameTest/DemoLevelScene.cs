@@ -1,5 +1,6 @@
 using SDL;
 using Shard;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -16,6 +17,8 @@ namespace GameTest
         private float exitHintTimer;
         private bool transitionPending;
         private bool pauseSettingsOpen;
+        private float volumeHintTimer;
+        private bool isMuted;
 
         public DemoLevelScene(DemoLevelDefinition level)
         {
@@ -28,6 +31,8 @@ namespace GameTest
             transitionPending = false;
             exitHintTimer = 0;
             pauseSettingsOpen = false;
+            volumeHintTimer = 0;
+            isMuted = false;
             pickups = new List<DemoPickup>();
             enemies = new List<DemoSlime>();
 
@@ -47,6 +52,12 @@ namespace GameTest
             if (exitHintTimer > 0)
             {
                 exitHintTimer -= (float)Bootstrap.getDeltaTime();
+            }
+
+            if (volumeHintTimer > 0)
+            {
+                volumeHintTimer -= (float)Bootstrap.getDeltaTime();
+                renderVolumeHint();
             }
 
             if (pauseUi != null && DemoRunState.Paused)
@@ -99,6 +110,18 @@ namespace GameTest
                 {
                     player.QueueJump();
                 }
+                else if (inp.Key == (int)SDL_Scancode.SDL_SCANCODE_EQUALS || inp.Key == (int)SDL_Scancode.SDL_SCANCODE_KP_PLUS)
+                {
+                    adjustVolume(0.1f);
+                }
+                else if (inp.Key == (int)SDL_Scancode.SDL_SCANCODE_MINUS || inp.Key == (int)SDL_Scancode.SDL_SCANCODE_KP_MINUS)
+                {
+                    adjustVolume(-0.1f);
+                }
+                else if (inp.Key == (int)SDL_Scancode.SDL_SCANCODE_M)
+                {
+                    toggleMute();
+                }
             }
             else if (eventType == "KeyUp")
             {
@@ -115,6 +138,31 @@ namespace GameTest
                     openPauseMenu();
                 }
             }
+        }
+
+        private void adjustVolume(float delta)
+        {
+            float newVolume = Bootstrap.getSound().MusicVolume + delta;
+            newVolume = Math.Clamp(newVolume, 0.0f, 1.0f);
+            Bootstrap.getSound().MusicVolume = newVolume;
+            Bootstrap.getSound().EffectsVolume = newVolume;
+            volumeHintTimer = 2.0f;
+        }
+
+        private void toggleMute()
+        {
+            isMuted = !isMuted;
+            if (isMuted)
+            {
+                Bootstrap.getSound().MusicVolume = 0;
+                Bootstrap.getSound().EffectsVolume = 0;
+            }
+            else
+            {
+                Bootstrap.getSound().MusicVolume = 1.0f;
+                Bootstrap.getSound().EffectsVolume = 1.0f;
+            }
+            volumeHintTimer = 2.0f;
         }
 
         public IReadOnlyList<RectangleF> GetSolidRects()
@@ -298,6 +346,21 @@ namespace GameTest
             if (exitHintTimer > 0)
             {
                 display.showText("The exit is locked until every collectible is picked up.", 300, 180, 20, 255, 215, 120);
+            }
+        }
+
+        private void renderVolumeHint()
+        {
+            Display display = Bootstrap.getDisplay();
+            int volumePercent = (int)(Bootstrap.getSound().MusicVolume * 100);
+
+            if (isMuted)
+            {
+                display.showText("MUTE (M to unmute)", 500, 50, 20, 255, 100, 100);
+            }
+            else
+            {
+                display.showText("Volume: " + volumePercent + "% (+/- to adjust, M to mute)", 500, 50, 20, 255, 255, 100);
             }
         }
 

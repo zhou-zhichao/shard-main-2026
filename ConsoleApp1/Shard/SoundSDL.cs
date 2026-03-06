@@ -181,6 +181,35 @@ namespace Shard
             StopMusic();
         }
 
+        public override void shutdown()
+        {
+            stopAllSounds();
+
+            if (mixer != null)
+            {
+                MIX_DestroyMixer(mixer);
+                mixer = null;
+            }
+
+            if (device != 0)
+            {
+                SDL_CloseAudioDevice(device);
+                device = 0;
+            }
+
+            cachedAudio.Clear();
+            preloadedAudio.Clear();
+        }
+
+        public override void restart()
+        {
+            shutdown();
+
+            SDL_Init(SDL_InitFlags.SDL_INIT_AUDIO);
+            MIX_Init();
+            ensureMixer();
+        }
+
         public override void stopSound(string file)
         {
             string path = resolveFile(file);
@@ -262,12 +291,22 @@ namespace Shard
 
                 SDL_ResumeAudioDevice(device);
             }
+            else if (mixer == null)
+            {
+                // Device exists but mixer was destroyed - need to reinitialize
+                return createMixer();
+            }
 
             if (mixer != null)
             {
                 return true;
             }
 
+            return createMixer();
+        }
+
+        private bool createMixer()
+        {
             SDL_AudioSpec spec = new SDL_AudioSpec();
             if (!SDL_GetAudioDeviceFormat(device, &spec, null))
             {

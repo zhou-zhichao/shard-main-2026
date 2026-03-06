@@ -1,4 +1,4 @@
-﻿/*
+/*
 *
 *   The Bootstrap - this loads the config file, processes it and then starts the game loop
 *   @author Michael Heron
@@ -137,13 +137,16 @@ namespace Shard
         public static void returnToLauncher()
         {
             // Clean up current game state
-            soundEngine.StopMusic();
             soundEngine.stopAllSounds();
             GameObjectManager.getInstance().clearAll();
             PhysicsManager.getInstance().clearAll();
             input.clearListeners();
             displayEngine.clearDisplay();
             sceneManager.reset();
+
+            // Shutdown and restart sound system for the launcher
+            soundEngine.shutdown();
+            soundEngine.restart();
 
             // Create and start a fresh launcher
             GameLauncher launcher = new GameLauncher();

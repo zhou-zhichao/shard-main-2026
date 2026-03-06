@@ -41,5 +41,11 @@ namespace Shard
 
         // unload all preloaded sounds from memory
         abstract public void clearPreloadedSounds();
+
+        // shutdown the sound system completely
+        abstract public void shutdown();
+
+        // restart the sound system after shutdown
+        abstract public void restart();
     }
 }

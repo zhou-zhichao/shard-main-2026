@@ -59,5 +59,18 @@ namespace GameTest
             ScoreManager.getInstance().AddScore(Score, ScoreGameName);
             ScoreSubmitted = true;
         }
+
+        public static void SubmitScoreWithName(string playerName)
+        {
+            if (ScoreSubmitted)
+            {
+                return;
+            }
+
+            ScoreManager.getInstance().SetPlayerName(playerName);
+            ScoreManager.getInstance().SetCurrentGame(ScoreGameName);
+            ScoreManager.getInstance().AddScore(Score, ScoreGameName);
+            ScoreSubmitted = true;
+        }
     }
 }

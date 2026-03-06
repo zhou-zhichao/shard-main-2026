@@ -88,7 +88,7 @@ namespace GameTest
             {
                 LevelNumber = 1,
                 Title = "Level 1 - Meadow Run",
-                MusicAsset = "time_for_adventure.mp3",
+                MusicAsset = "bgm1.wav",
                 BackgroundColor = Color.FromArgb(118, 202, 242),
                 AccentColor = Color.FromArgb(221, 243, 255),
                 PlayerSpawnX = 96,
@@ -145,7 +145,7 @@ namespace GameTest
             {
                 LevelNumber = 2,
                 Title = "Level 2 - Cavern Relay",
-                MusicAsset = "testmusic.wav",
+                MusicAsset = "bgm2.wav",
                 BackgroundColor = Color.FromArgb(38, 52, 90),
                 AccentColor = Color.FromArgb(118, 143, 206),
                 PlayerSpawnX = 96,

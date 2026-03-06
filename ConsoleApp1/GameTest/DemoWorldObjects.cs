@@ -10,6 +10,8 @@ namespace GameTest
         {
             transform.SpritePath = Bootstrap.getAssetManager().getAssetPath(texture);
             transform.SetSpriteSourceRect(column * frameWidth, row * frameHeight, frameWidth, frameHeight);
+            transform.Wid = frameWidth;
+            transform.Ht = frameHeight;
             transform.Scalex = scale;
             transform.Scaley = scale;
         }
@@ -18,18 +20,25 @@ namespace GameTest
         {
             transform.SpritePath = Bootstrap.getAssetManager().getAssetPath(placement.Texture);
 
+            int srcX, srcY, srcW, srcH;
             if (placement.SourceWidth > 0 && placement.SourceHeight > 0)
             {
-                transform.SetSpriteSourceRect(placement.SourceX, placement.SourceY, placement.SourceWidth, placement.SourceHeight);
+                srcX = placement.SourceX;
+                srcY = placement.SourceY;
+                srcW = placement.SourceWidth;
+                srcH = placement.SourceHeight;
             }
             else
             {
-                transform.SetSpriteSourceRect(
-                    placement.Column * placement.FrameWidth,
-                    placement.Row * placement.FrameHeight,
-                    placement.FrameWidth,
-                    placement.FrameHeight);
+                srcX = placement.Column * placement.FrameWidth;
+                srcY = placement.Row * placement.FrameHeight;
+                srcW = placement.FrameWidth;
+                srcH = placement.FrameHeight;
             }
+
+            transform.SetSpriteSourceRect(srcX, srcY, srcW, srcH);
+            transform.Wid = srcW;
+            transform.Ht = srcH;
 
             transform.Scalex = placement.Scale;
             transform.Scaley = placement.Scale;
