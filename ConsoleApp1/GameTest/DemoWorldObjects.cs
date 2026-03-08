@@ -588,25 +588,29 @@ namespace GameTest
         }
     }
 
-    class DemoMushroom : GameObject
+    class DemoAudioBeacon : GameObject
     {
         private float x;
         private float y;
         private float scale;
         private float maxDistance;
+        private float baseVolume;
         private string soundAsset;
         private int trackHandle;
         private bool isPlaying;
+        private float visualWidth;
+        private float visualHeight;
 
         public float X => x;
         public float Y => y;
 
-        public void Configure(DemoMushroomPlacement placement)
+        public void Configure(DemoAudioBeaconPlacement placement)
         {
             x = placement.X;
             y = placement.Y;
             scale = placement.Scale;
-            maxDistance = placement.MaxDistance;
+            maxDistance = placement.MaxDistance > 1.0f ? placement.MaxDistance : 1.0f;
+            baseVolume = placement.BaseVolume;
             soundAsset = placement.SoundAsset;
 
             Transform.X = x;
@@ -620,15 +624,17 @@ namespace GameTest
             Transform.SetSpriteSourceRect(16, 0, 16, 16);
             Transform.Wid = 16;
             Transform.Ht = 16;
+            visualWidth = Transform.Wid * Transform.Scalex;
+            visualHeight = Transform.Ht * Transform.Scaley;
 
             isPlaying = false;
+            trackHandle = -1;
         }
 
         public void StartSound()
         {
             if (!isPlaying)
             {
-                const float baseVolume = 10.0f;
                 trackHandle = Bootstrap.getSound().playSoundWithHandle(soundAsset, baseVolume, true);
                 if (trackHandle >= 0)
                 {
@@ -644,6 +650,7 @@ namespace GameTest
             {
                 Bootstrap.getSound().stopTrack(trackHandle);
                 isPlaying = false;
+                trackHandle = -1;
             }
         }
 
@@ -667,28 +674,28 @@ namespace GameTest
                 return;
             }
 
-            float dx = playerX - (x + 12);
-            float dy = playerY - (y + 12);
+            float dx = playerX - GetCenterX();
+            float dy = playerY - GetCenterY();
             float distance = (float)Math.Sqrt(dx * dx + dy * dy);
-
-            float volume;
-            if (distance >= maxDistance)
-            {
-                volume = 0.0f;
-            }
-            else
-            {
-                // Use linear falloff for more audible volume
-                volume = 1.0f - (distance / maxDistance);
-            }
-
-            const float baseVolume = 0.5f;
-            Bootstrap.getSound().setTrackVolume(trackHandle, volume * baseVolume);
+            float normalizedDistance = distance / maxDistance;
+            float attenuation = normalizedDistance >= 1.0f ? 0.0f : 1.0f - normalizedDistance;
+            attenuation = attenuation <= 0.0f ? 0.0f : (float)Math.Sqrt(attenuation);
+            Bootstrap.getSound().setTrackVolume(trackHandle, attenuation);
         }
 
         public override void update()
         {
             Bootstrap.getDisplay().addToDraw(this);
+        }
+
+        private float GetCenterX()
+        {
+            return x + (visualWidth * 0.5f);
+        }
+
+        private float GetCenterY()
+        {
+            return y + (visualHeight * 0.5f);
         }
     }
 }

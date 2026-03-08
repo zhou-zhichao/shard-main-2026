@@ -8,14 +8,17 @@ namespace GameTest
 {
     class DemoResultScene : Scene, InputListener
     {
+        private const string DefaultPlayerName = "Player";
+        private const float InitialInputSuppressionSeconds = 0.35f;
+
         private readonly bool success;
         private List<ScoreEntry> topScores;
         private string playerName;
         private bool isEnteringName;
         private StringBuilder nameInput;
-        private const string DefaultPlayerName = "Player";
-
         private RectangleF clearButtonBounds;
+        private HashSet<int> armedKeys;
+        private float inputSuppressionTimer;
 
         public DemoResultScene(bool success)
         {
@@ -33,6 +36,8 @@ namespace GameTest
             playerName = DefaultPlayerName;
             isEnteringName = true;
             nameInput = new StringBuilder();
+            armedKeys = new HashSet<int>();
+            inputSuppressionTimer = InitialInputSuppressionSeconds;
 
             clearButtonBounds = new RectangleF(800, 260, 120, 40);
 
@@ -41,6 +46,15 @@ namespace GameTest
 
         public override void update()
         {
+            if (inputSuppressionTimer > 0)
+            {
+                inputSuppressionTimer -= (float)Bootstrap.getDeltaTime();
+                if (inputSuppressionTimer < 0)
+                {
+                    inputSuppressionTimer = 0;
+                }
+            }
+
             Display display = Bootstrap.getDisplay();
             Color bg = success ? Color.FromArgb(32, 74, 42) : Color.FromArgb(74, 34, 34);
             Color accent = success ? Color.FromArgb(110, 190, 120) : Color.FromArgb(220, 120, 120);
@@ -113,7 +127,27 @@ namespace GameTest
                 return;
             }
 
+            if (eventType == "KeyDown")
+            {
+                if (inputSuppressionTimer <= 0 && IsHandledKey(inp.Key))
+                {
+                    armedKeys.Add(inp.Key);
+                }
+                return;
+            }
+
             if (eventType != "KeyUp")
+            {
+                return;
+            }
+
+            if (inputSuppressionTimer > 0)
+            {
+                armedKeys.Remove(inp.Key);
+                return;
+            }
+
+            if (!armedKeys.Remove(inp.Key))
             {
                 return;
             }
@@ -175,6 +209,24 @@ namespace GameTest
                 }
                 return;
             }
+        }
+
+        private static bool IsHandledKey(int key)
+        {
+            if (key == (int)SDL_Scancode.SDL_SCANCODE_RETURN ||
+                key == (int)SDL_Scancode.SDL_SCANCODE_KP_ENTER ||
+                key == (int)SDL_Scancode.SDL_SCANCODE_SPACE ||
+                key == (int)SDL_Scancode.SDL_SCANCODE_BACKSPACE)
+            {
+                return true;
+            }
+
+            if (key >= (int)SDL_Scancode.SDL_SCANCODE_A && key <= (int)SDL_Scancode.SDL_SCANCODE_Z)
+            {
+                return true;
+            }
+
+            return key >= (int)SDL_Scancode.SDL_SCANCODE_0 && key <= (int)SDL_Scancode.SDL_SCANCODE_9;
         }
 
         private void submitScore()

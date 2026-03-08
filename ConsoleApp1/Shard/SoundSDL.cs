@@ -22,7 +22,8 @@ namespace Shard
         public bool Loop { get; set; }
         public float Pan { get; set; }  // -1.0 = left, 0 = center, 1.0 = right
         public AudioGroup Group { get; set; }  // Associated audio group
-        public float BaseVolume { get; set; }  // Base volume for spatial audio
+        public float BaseVolume { get; set; }  // Per-track base volume
+        public float RuntimeGain { get; set; }  // Dynamic gain applied on top of BaseVolume
     }
 
     public unsafe class SoundSDL : Sound
@@ -165,7 +166,9 @@ namespace Shard
                 FilePath = path,
                 IsMusic = false,
                 Loop = loop,
-                Pan = 0.0f
+                Pan = 0.0f,
+                BaseVolume = 1.0f,
+                RuntimeGain = 1.0f
             });
         }
 
@@ -319,7 +322,7 @@ namespace Shard
 
             MIX_SetTrackAudio(track, audio);
             MIX_SetTrackLoops(track, loop ? -1 : 0);
-            MIX_SetTrackGain(track, volume * effectsVolume * masterVolume);
+            MIX_SetTrackGain(track, 0.0f);
 
             if (!MIX_PlayTrack(track, 0))
             {
@@ -337,7 +340,8 @@ namespace Shard
                 IsMusic = false,
                 Loop = loop,
                 Pan = 0.0f,
-                BaseVolume = volume
+                BaseVolume = clampVolume(volume),
+                RuntimeGain = 0.0f
             });
 
             return trackId;
@@ -354,8 +358,8 @@ namespace Shard
             {
                 if (effect.Id == trackHandle && effect.Track != null)
                 {
-                    float finalVolume = volume * effect.BaseVolume * effectsVolume * masterVolume;
-                    MIX_SetTrackGain(effect.Track, finalVolume);
+                    effect.RuntimeGain = clampVolume(volume);
+                    applyEffectTrackGain(effect);
                     break;
                 }
             }
@@ -497,10 +501,7 @@ namespace Shard
 
             foreach (ActiveTrack effect in activeEffects)
             {
-                if (effect.Track != null)
-                {
-                    MIX_SetTrackGain(effect.Track, EffectsVolume);
-                }
+                applyEffectTrackGain(effect);
             }
         }
 
@@ -523,8 +524,20 @@ namespace Shard
                     continue;
                 }
 
-                // Only cleanup tracks that are not set to loop
-                if (!track.Loop && !MIX_TrackPlaying(track.Track))
+                if (MIX_TrackPlaying(track.Track))
+                {
+                    continue;
+                }
+
+                if (track.Loop && !isPaused)
+                {
+                    if (restartLoopingEffect(track))
+                    {
+                        continue;
+                    }
+                }
+
+                if (!track.Loop)
                 {
                     MIX_DestroyTrack(track.Track);
                     activeEffects.RemoveAt(i);
@@ -569,8 +582,71 @@ namespace Shard
                 FilePath = path,
                 IsMusic = isMusic,
                 Loop = loop,
-                Pan = 0.0f
+                Pan = 0.0f,
+                BaseVolume = 1.0f,
+                RuntimeGain = 1.0f
             };
+        }
+
+        private void applyEffectTrackGain(ActiveTrack effect)
+        {
+            if (effect == null || effect.Track == null)
+            {
+                return;
+            }
+
+            float finalVolume = effect.BaseVolume * effect.RuntimeGain;
+            if (effect.Group != null)
+            {
+                finalVolume *= effect.Group.Volume;
+                if (effect.Group.Paused)
+                {
+                    finalVolume = 0.0f;
+                }
+            }
+
+            finalVolume *= effectsVolume;
+            MIX_SetTrackGain(effect.Track, finalVolume);
+        }
+
+        private bool restartLoopingEffect(ActiveTrack effect)
+        {
+            if (effect == null || string.IsNullOrWhiteSpace(effect.FilePath))
+            {
+                return false;
+            }
+
+            MIX_Audio* audio = loadAudio(effect.FilePath);
+            if (audio == null)
+            {
+                return false;
+            }
+
+            MIX_DestroyTrack(effect.Track);
+            effect.Track = null;
+
+            MIX_Track* track = MIX_CreateTrack(mixer);
+            if (track == null)
+            {
+                Debug.getInstance().log("Sound warning: failed to recreate looping effect track. " + SDL_GetError(), Debug.DEBUG_LEVEL_WARNING);
+                return false;
+            }
+
+            MIX_SetTrackAudio(track, audio);
+            MIX_SetTrackLoops(track, -1);
+            effect.Track = track;
+            applyEffectTrackGain(effect);
+            applyTrackPan(track, effect.Pan);
+
+            if (!MIX_PlayTrack(track, 0))
+            {
+                Debug.getInstance().log("Sound warning: failed to restart looping effect track. " + SDL_GetError(), Debug.DEBUG_LEVEL_WARNING);
+                MIX_DestroyTrack(track);
+                effect.Track = null;
+                return false;
+            }
+
+            return true;
         }
 
         private void destroyCachedAudio(string path)
@@ -750,7 +826,7 @@ namespace Shard
 
             // Calculate and apply volume (group volume * effects volume * master volume)
             // If group is paused, volume is 0
-            float finalVolume = (group.Paused ? 0.0f : volume * group.Volume * effectsVolume * masterVolume);
+            float finalVolume = (group.Paused ? 0.0f : volume * group.Volume * effectsVolume);
             MIX_SetTrackGain(track, finalVolume);
 
             // Play the track
@@ -769,7 +845,9 @@ namespace Shard
                 IsMusic = false,
                 Loop = loop,
                 Pan = 0.0f,
-                Group = group
+                Group = group,
+                BaseVolume = clampVolume(volume),
+                RuntimeGain = 1.0f
             });
         }
 
@@ -788,7 +866,7 @@ namespace Shard
             {
                 if (effect.Group != null && string.Equals(effect.Group.Name, groupName, StringComparison.OrdinalIgnoreCase) && effect.Track != null)
                 {
-                    MIX_SetTrackGain(effect.Track, 0.0f);
+                    applyEffectTrackGain(effect);
                 }
             }
         }
@@ -808,8 +886,7 @@ namespace Shard
             {
                 if (effect.Group != null && string.Equals(effect.Group.Name, groupName, StringComparison.OrdinalIgnoreCase) && effect.Track != null)
                 {
-                    float finalVolume = effect.Group.Volume * effectsVolume * masterVolume;
-                    MIX_SetTrackGain(effect.Track, finalVolume);
+                    applyEffectTrackGain(effect);
                 }
             }
         }

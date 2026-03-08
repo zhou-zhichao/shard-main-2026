@@ -40,13 +40,14 @@ namespace GameTest
         public float Scale { get; set; }
     }
 
-    class DemoMushroomPlacement
+    class DemoAudioBeaconPlacement
     {
         public float X { get; set; }
         public float Y { get; set; }
         public float Scale { get; set; }
         public string SoundAsset { get; set; }
         public float MaxDistance { get; set; }
+        public float BaseVolume { get; set; } = 1.0f;
     }
 
     class DemoGroundBand
@@ -75,7 +76,7 @@ namespace GameTest
         public List<RectangleF> Solids { get; set; } = new List<RectangleF>();
         public List<DemoPickupPlacement> Pickups { get; set; } = new List<DemoPickupPlacement>();
         public List<DemoEnemyPlacement> Enemies { get; set; } = new List<DemoEnemyPlacement>();
-        public List<DemoMushroomPlacement> Mushrooms { get; set; } = new List<DemoMushroomPlacement>();
+        public List<DemoAudioBeaconPlacement> AudioBeacons { get; set; } = new List<DemoAudioBeaconPlacement>();
     }
 
     static class DemoLevelCatalog
@@ -188,13 +189,14 @@ namespace GameTest
             level.Enemies.Add(new DemoEnemyPlacement { X = 656, Y = 744, MinX = 576, MaxX = 736, Speed = 110, Scale = 2.5f });
             level.Enemies.Add(new DemoEnemyPlacement { X = 878, Y = 438, MinX = 846, MaxX = 918, Speed = 120, Scale = 2.5f });
 
-            level.Mushrooms.Add(new DemoMushroomPlacement
+            level.AudioBeacons.Add(new DemoAudioBeaconPlacement
             {
                 X = 676,
                 Y = 536,
                 Scale = 3.0f,
                 SoundAsset = "beep_loop.wav",
-                MaxDistance = 400.0f
+                MaxDistance = 640.0f,
+                BaseVolume = 1.0f
             });
 
             level.ExitBounds = new RectangleF(1184, 272, 56, 96);

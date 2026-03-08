@@ -14,7 +14,7 @@ namespace GameTest
         private UISystem pauseUi;
         private List<DemoPickup> pickups;
         private List<DemoSlime> enemies;
-        private List<DemoMushroom> mushrooms;
+        private List<DemoAudioBeacon> audioBeacons;
         private float exitHintTimer;
         private bool transitionPending;
         private bool pauseSettingsOpen;
@@ -36,7 +36,7 @@ namespace GameTest
             isMuted = false;
             pickups = new List<DemoPickup>();
             enemies = new List<DemoSlime>();
-            mushrooms = new List<DemoMushroom>();
+            audioBeacons = new List<DemoAudioBeacon>();
 
             Bootstrap.getDisplay().setClearColor(level.BackgroundColor);
             Bootstrap.getInput().addListener(this);
@@ -62,9 +62,9 @@ namespace GameTest
                 renderVolumeHint();
             }
 
-            foreach (DemoMushroom mushroom in mushrooms)
+            foreach (DemoAudioBeacon audioBeacon in audioBeacons)
             {
-                mushroom.UpdateSpatialAudio(player.CenterX, player.CenterY);
+                audioBeacon.UpdateSpatialAudio(player.CenterX, player.CenterY);
             }
 
             if (pauseUi != null && DemoRunState.Paused)
@@ -82,9 +82,9 @@ namespace GameTest
             Bootstrap.getSound().StopMusic();
             Bootstrap.getSound().ResumeAll();
 
-            foreach (DemoMushroom mushroom in mushrooms)
+            foreach (DemoAudioBeacon audioBeacon in audioBeacons)
             {
-                mushroom.StopSound();
+                audioBeacon.StopSound();
             }
         }
 
@@ -260,9 +260,9 @@ namespace GameTest
             pauseUi.SetScreen("pause_menu");
             Bootstrap.getSound().PauseAll();
 
-            foreach (DemoMushroom mushroom in mushrooms)
+            foreach (DemoAudioBeacon audioBeacon in audioBeacons)
             {
-                mushroom.PauseSound();
+                audioBeacon.PauseSound();
             }
         }
 
@@ -274,9 +274,9 @@ namespace GameTest
             DemoSettings.SyncCurrentScreen(pauseUi);
             Bootstrap.getSound().PauseAll();
 
-            foreach (DemoMushroom mushroom in mushrooms)
+            foreach (DemoAudioBeacon audioBeacon in audioBeacons)
             {
-                mushroom.PauseSound();
+                audioBeacon.PauseSound();
             }
         }
 
@@ -286,9 +286,9 @@ namespace GameTest
             DemoRunState.SetPaused(false);
             Bootstrap.getSound().ResumeAll();
 
-            foreach (DemoMushroom mushroom in mushrooms)
+            foreach (DemoAudioBeacon audioBeacon in audioBeacons)
             {
-                mushroom.ResumeSound();
+                audioBeacon.ResumeSound();
             }
         }
 
@@ -320,12 +320,12 @@ namespace GameTest
                 enemies.Add(slime);
             }
 
-            foreach (DemoMushroomPlacement mushroom in level.Mushrooms)
+            foreach (DemoAudioBeaconPlacement audioBeacon in level.AudioBeacons)
             {
-                DemoMushroom mush = new DemoMushroom();
-                mush.Configure(mushroom);
-                mush.StartSound();
-                mushrooms.Add(mush);
+                DemoAudioBeacon beacon = new DemoAudioBeacon();
+                beacon.Configure(audioBeacon);
+                beacon.StartSound();
+                audioBeacons.Add(beacon);
             }
 
             exitPortal = new DemoExitPortal();
