@@ -250,8 +250,8 @@ namespace Shard
                     sRect.h = trans.Ht;
                 }
 
-                tRect.x = (float)trans.X;
-                tRect.y = (float)trans.Y;
+                tRect.x = (float)(trans.X + trans.RenderOffsetX);
+                tRect.y = (float)(trans.Y + trans.RenderOffsetY);
                 tRect.w = (float)(trans.Wid * trans.Scalex);
                 tRect.h = (float)(trans.Ht * trans.Scaley);
 

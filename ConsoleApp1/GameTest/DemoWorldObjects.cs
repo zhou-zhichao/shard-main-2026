@@ -329,6 +329,7 @@ namespace GameTest
         private const float gravity = 1450.0f;
         private const float jumpVelocity = 680.0f;
         private const float playerScale = 2.4f;
+        private const float playerVisualGroundOffset = 4.0f;
         private const float spawnInvulnerabilityDuration = 0.75f;
         private const float maxSimulationStep = 1.0f / 30.0f;
 
@@ -382,6 +383,7 @@ namespace GameTest
             Transform.Y = y;
             Transform.Scalex = playerScale;
             Transform.Scaley = playerScale;
+            Transform.RenderOffsetY = playerVisualGroundOffset * playerScale;
             float drawSize = 32.0f * playerScale;
             boundsOffsetX = drawSize * 0.15625f;
             boundsOffsetY = drawSize * 0.09375f;
