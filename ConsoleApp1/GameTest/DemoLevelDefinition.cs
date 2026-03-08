@@ -272,7 +272,10 @@ namespace GameTest
 
         private static void addPalmTree(DemoLevelDefinition level, float x, float y)
         {
+            addBackdropTile(level, x, y - TileSize, 3, 4, 4.0f);
+            addBackdropTile(level, x - TileSize, y, 2, 5, 4.0f);
             addBackdropTile(level, x, y, 3, 5, 4.0f);
+            addBackdropTile(level, x + TileSize, y, 4, 5, 4.0f);
             addBackdropTile(level, x, y + TileSize, 3, 6, 4.0f);
             addBackdropTile(level, x, y + (TileSize * 2), 3, 7, 4.0f);
             addBackdropTile(level, x, y + (TileSize * 3), 3, 8, 4.0f);
