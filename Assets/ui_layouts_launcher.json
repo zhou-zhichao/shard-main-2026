@@ -22,11 +22,11 @@
           "anchorY": "middle",
           "x": -150,
           "y": -145,
-          "text": "Two-Level Platform Demo",
+          "text": "Game Launcher",
           "fontSize": 24
         },
         {
-          "id": "start_demo_button",
+          "id": "select_game_button",
           "type": "button",
           "anchorX": "center",
           "anchorY": "middle",
@@ -34,9 +34,9 @@
           "y": -40,
           "width": 340,
           "height": 72,
-          "text": "Start Demo",
+          "text": "Select Game",
           "fontSize": 30,
-          "action": "start_demo"
+          "action": "open_games"
         },
         {
           "id": "launcher_settings_button",
@@ -63,6 +63,101 @@
           "text": "Exit",
           "fontSize": 30,
           "action": "exit_game"
+        }
+      ]
+    },
+    {
+      "id": "launcher_games",
+      "elements": [
+        {
+          "id": "games_panel",
+          "type": "panel",
+          "anchorX": "center",
+          "anchorY": "middle",
+          "x": -300,
+          "y": -300,
+          "width": 600,
+          "height": 620,
+          "text": "Select Game",
+          "fontSize": 38
+        },
+        {
+          "id": "game_test_button",
+          "type": "button",
+          "anchorX": "center",
+          "anchorY": "middle",
+          "x": -200,
+          "y": -180,
+          "width": 400,
+          "height": 60,
+          "text": "Platform Demo",
+          "fontSize": 26,
+          "action": "start_game_test"
+        },
+        {
+          "id": "game_breakout_button",
+          "type": "button",
+          "anchorX": "center",
+          "anchorY": "middle",
+          "x": -200,
+          "y": -100,
+          "width": 400,
+          "height": 60,
+          "text": "Breakout",
+          "fontSize": 26,
+          "action": "start_breakout"
+        },
+        {
+          "id": "game_space_invaders_button",
+          "type": "button",
+          "anchorX": "center",
+          "anchorY": "middle",
+          "x": -200,
+          "y": -20,
+          "width": 400,
+          "height": 60,
+          "text": "Space Invaders",
+          "fontSize": 26,
+          "action": "start_space_invaders"
+        },
+        {
+          "id": "game_manic_miner_button",
+          "type": "button",
+          "anchorX": "center",
+          "anchorY": "middle",
+          "x": -200,
+          "y": 60,
+          "width": 400,
+          "height": 60,
+          "text": "Manic Miner",
+          "fontSize": 26,
+          "action": "start_manic_miner"
+        },
+        {
+          "id": "game_missile_command_button",
+          "type": "button",
+          "anchorX": "center",
+          "anchorY": "middle",
+          "x": -200,
+          "y": 140,
+          "width": 400,
+          "height": 60,
+          "text": "Missile Command",
+          "fontSize": 26,
+          "action": "start_missile_command"
+        },
+        {
+          "id": "games_back_button",
+          "type": "button",
+          "anchorX": "center",
+          "anchorY": "middle",
+          "x": -200,
+          "y": 230,
+          "width": 400,
+          "height": 60,
+          "text": "Back",
+          "fontSize": 26,
+          "action": "back_launcher_main"
         }
       ]
     },

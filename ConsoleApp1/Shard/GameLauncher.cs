@@ -20,10 +20,17 @@ namespace Shard
             uiSystem.LoadFromAsset("ui_layouts_launcher.json");
             DemoSettings.Bind(uiSystem);
 
-            uiSystem.BindButtonAction("start_demo", StartDemo);
+            uiSystem.BindButtonAction("open_games", OpenGames);
             uiSystem.BindButtonAction("open_settings", OpenSettings);
             uiSystem.BindButtonAction("exit_game", ExitGame);
             uiSystem.BindButtonAction("back_launcher_main", EnterMainMenu);
+
+            // Game launch buttons
+            uiSystem.BindButtonAction("start_game_test", () => LaunchGame(new GameTest()));
+            uiSystem.BindButtonAction("start_breakout", () => LaunchGame(new GameBreakout()));
+            uiSystem.BindButtonAction("start_space_invaders", () => LaunchGame(new GameSpaceInvaders()));
+            uiSystem.BindButtonAction("start_manic_miner", () => LaunchGame(new GameManicMiner()));
+            uiSystem.BindButtonAction("start_missile_command", () => LaunchGame(new GameMissileCommand()));
 
             DemoSettings.ApplyCurrentRuntimeValues();
             DemoSettings.SyncCurrentScreen(uiSystem);
@@ -50,6 +57,12 @@ namespace Shard
         {
             uiSystem.SetScreen("launcher_main");
             CreateMenuEnemy();
+        }
+
+        private void OpenGames()
+        {
+            DestroyMenuEnemy();
+            uiSystem.SetScreen("launcher_games");
         }
 
         private void OpenSettings()
@@ -83,7 +96,7 @@ namespace Shard
             menuEnemy = null;
         }
 
-        private void StartDemo()
+        private void LaunchGame(Game newGame)
         {
             DestroyMenuEnemy();
 
@@ -96,9 +109,8 @@ namespace Shard
             Bootstrap.getDisplay().clearDisplay();
             Bootstrap.getSceneManager().reset();
 
-            Game newGame = new GameTest();
             Bootstrap.setRunningGame(newGame);
-            Bootstrap.setTargetFrameRate(DemoSettings.GetTargetFrameRate());
+            Bootstrap.setTargetFrameRate(newGame.getTargetFrameRate());
             newGame.initialize();
         }
 
@@ -108,3 +120,4 @@ namespace Shard
         }
     }
 }
+
